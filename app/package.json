@@ -2,15 +2,17 @@
   "name": "moreplease-open",
   "private": true,
   "scripts": {
-    "start": "meteor run",
+    "start": "meteor run --settings=config/settings_local.json --port 3200",
     "lint": "eslint ."
   },
   "dependencies": {
     "babel-runtime": "^6.23.0",
+    "cron": "^1.2.1",
     "meteor-node-stubs": "~0.2.8",
     "prop-types": "^15.5.10",
     "react": "^15.5.4",
     "react-addons-pure-render-mixin": "^15.5.2",
+    "react-bootstrap": "^0.31.0",
     "react-dom": "^15.5.4"
   },
   "devDependencies": {
