@@ -1,0 +1,13 @@
+<template name="adminLayout">
+  {{> sAlert}}
+  {{#AdminLTE skin="red"}}
+    <div class="wrapper">
+      {{> adminHeader}}
+      {{> adminSidebar}}
+      <div class="content-wrapper">
+        {{> Template.dynamic template=main}}
+      </div>
+      {{> adminFooter}}
+    </div>
+  {{/AdminLTE}}
+</template>

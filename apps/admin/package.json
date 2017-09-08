@@ -1,0 +1,13 @@
+{
+  "name": "admin",
+  "private": true,
+  "scripts": {
+    "start": "meteor --port 3100 --settings=./config/settings_local.json"
+  },
+  "dependencies": {
+    "babel-runtime": "^6.20.0",
+    "bcrypt": "^1.0.3",
+    "mailgun-js": "^0.7.7",
+    "meteor-node-stubs": "~0.2.4"
+  }
+}

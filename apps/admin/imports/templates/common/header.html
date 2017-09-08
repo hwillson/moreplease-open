@@ -1,0 +1,31 @@
+<template name="adminHeader">
+  <header class="main-header">
+
+    <a href="{{pathFor 'adminWelcome'}}" class="logo">
+      <span class="logo-mini"><b>mp</b></span>
+      <span class="logo-lg">
+        <i class="fa fa-cubes"></i>
+        <strong>moreplease</strong>.io
+      </span>
+    </a>
+
+    <nav class="navbar navbar-static-top" role="navigation">
+      <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+        <span class="sr-only">Toggle navigation</span>
+      </a>
+      <div class="navbar-custom-menu">
+        <ul class="nav navbar-nav">
+          {{#if currentUser}}
+            <li>
+              <a href="{{supportSiteUrl}}" target="_blank" title="Support">
+                <i class="fa fa-support"></i>
+              </a>
+            </li>
+          {{/if}}
+          {{> loginButtons}}
+        </ul>
+      </div>
+    </nav>
+
+  </header>
+</template>

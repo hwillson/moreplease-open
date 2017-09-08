@@ -1,0 +1,79 @@
+<template name="adminDashboard">
+
+  <section class="content-header">
+    <h1>
+      MorePlease
+      <small>ADMIN</small>
+    </h1>
+    <ol class="breadcrumb">
+      <li>
+        <a href="{{pathFor 'adminDashboard'}}">
+          <i class="fa fa-map"></i> Home
+        </a>
+      </li>
+      <li class="active">Dashboard</li>
+    </ol>
+  </section>
+
+  <section class="content">
+
+    <div class="box box-default">
+      <div class="box-header with-border">
+        <h3 class="box-title"><i class="fa fa-dashboard"></i> Welcome!</h3>
+      </div>
+      <div class="box-body">
+        <p>
+          Welcome to the <strong>MorePlease</strong> subscription management system.
+        </p>
+        <p>
+          If you have any questions regarding this system, or need a hand getting started, please contact <a href="mailto:support@moreplease.io">support@moreplease.io</a>.
+        </p>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4">
+        <div class="info-box">
+          <span class="info-box-icon bg-red">
+            <i class="fa fa-group"></i>
+          </span>
+          <div class="info-box-content">
+            <span class="info-box-text">Subscriptions Renewed Yesterday</span>
+            <span class="info-box-number">{{renewalCounts.yesterday}}</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="info-box">
+          <span class="info-box-icon bg-green">
+            <i class="fa fa-group"></i>
+          </span>
+          <div class="info-box-content">
+            <span class="info-box-text">Subscriptions Renewed Today</span>
+            <span class="info-box-number">{{renewalCounts.today}}</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="info-box">
+          <span class="info-box-icon bg-yellow">
+            <i class="fa fa-group"></i>
+          </span>
+          <div class="info-box-content">
+            <span class="info-box-text">Subscriptions Renewing Tomorrow</span>
+            <span class="info-box-number">{{renewalCounts.tomorrow}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="box box-default">
+      <div class="box-body">
+        {{> highchartsHelper chartId="chart-sub-overview" chartWidth="100%"
+          charHeight="100%" chartObject=subscriptionOverviewChart}}
+      </div>
+    </div>
+
+  </section>
+
+</template>

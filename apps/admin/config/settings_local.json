@@ -1,0 +1,23 @@
+{
+  "public": {
+    "loglevel": {
+      "moreplease": "debug"
+    },
+    "cronEnabled": false
+  },
+  "private": {
+    "admin": {
+      "username": "mpadmin",
+      "email": "mpadmin@octonary.com"
+    },
+    "email": {
+      "mailgun": {
+        "apiKey": "key-dfe59613d8f47cd43ddb9490b63f962b",
+        "domain": "mg.moreplease.io"
+      }
+    },
+    "sentry": {
+      "dsn": "https://ab8be7f7530748c3b3fa1d33b4fcb4f9:59cc62b23db44dee9f4222f5c6410a98@sentry.io/126931"
+    }
+  }
+}

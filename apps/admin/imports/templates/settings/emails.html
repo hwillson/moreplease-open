@@ -1,0 +1,57 @@
+<template name="adminSettingsEmails">
+
+  <div class="admin-settings-email">
+
+    <section class="content-header">
+      <h1>
+        <i class="fa fa-gears"></i> Settings
+      </h1>
+      <ol class="breadcrumb">
+        <li>
+          <a href="{{pathFor 'adminDashbaord'}}">
+            <i class="fa fa-map"></i> Dashboard
+          </a>
+        </li>
+        <li>Settings</li>
+        <li class="active">Email</li>
+      </ol>
+    </section>
+
+    <section class="content">
+      {{> adminSettingsEmail emailType="reminder"
+        selectedEmailVar=selectedEmailVar}}
+      {{> adminSettingsEmail emailType="paymentFailed"
+        selectedEmailVar=selectedEmailVar}}
+    </section>
+
+    <div id="email-test-modal" class="modal fade" tabindex="-1" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          {{#if Template.subscriptionsReady}}
+            {{#autoForm id="email-test-form" type="method"
+                schema=testEmailSchema
+                meteormethod="MorePlease.methods.testEmail.send"
+                singleMethodArgument=true}}
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Reminder Email Test</h4>
+              </div>
+              <div class="modal-body">
+                {{> afFieldInput name="emailId" value=selectedEmailId}}
+                {{> afQuickField name="emailAddress" class="recipient-email"}}
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary">Send</button>
+              </div>
+            {{/autoForm}}
+          {{else}}
+            Loading ...
+          {{/if}}
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</template>

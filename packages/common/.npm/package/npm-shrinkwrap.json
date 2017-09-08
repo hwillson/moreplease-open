@@ -1,0 +1,39 @@
+{
+  "dependencies": {
+    "cookie": {
+      "version": "0.3.1",
+      "resolved": "https://registry.npmjs.org/cookie/-/cookie-0.3.1.tgz",
+      "from": "cookie@0.3.1"
+    },
+    "json-stringify-safe": {
+      "version": "5.0.1",
+      "resolved": "https://registry.npmjs.org/json-stringify-safe/-/json-stringify-safe-5.0.1.tgz",
+      "from": "json-stringify-safe@5.0.1"
+    },
+    "lsmod": {
+      "version": "1.0.0",
+      "resolved": "https://registry.npmjs.org/lsmod/-/lsmod-1.0.0.tgz",
+      "from": "lsmod@1.0.0"
+    },
+    "raven": {
+      "version": "2.1.2",
+      "resolved": "https://registry.npmjs.org/raven/-/raven-2.1.2.tgz",
+      "from": "raven@2.1.2"
+    },
+    "stack-trace": {
+      "version": "0.0.9",
+      "resolved": "https://registry.npmjs.org/stack-trace/-/stack-trace-0.0.9.tgz",
+      "from": "stack-trace@0.0.9"
+    },
+    "timed-out": {
+      "version": "4.0.1",
+      "resolved": "https://registry.npmjs.org/timed-out/-/timed-out-4.0.1.tgz",
+      "from": "timed-out@4.0.1"
+    },
+    "uuid": {
+      "version": "3.0.0",
+      "resolved": "https://registry.npmjs.org/uuid/-/uuid-3.0.0.tgz",
+      "from": "uuid@3.0.0"
+    }
+  }
+}

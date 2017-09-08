@@ -1,0 +1,73 @@
+<template name="adminSettingsStore">
+
+  <div class="admin-settings-store">
+
+    <section class="content-header">
+      <h1>
+        <i class="fa fa-gears"></i> Settings
+      </h1>
+      <ol class="breadcrumb">
+        <li>
+          <a href="{{pathFor 'adminDashbaord'}}">
+            <i class="fa fa-map"></i> Dashboard
+          </a>
+        </li>
+        <li>Settings</li>
+        <li class="active">Store</li>
+      </ol>
+    </section>
+
+    <section class="content">
+      <div class="box">
+        <div class="box-header with-border">
+          <h3 class="box-title">Store</h3>
+        </div>
+        <div class="box-body">
+
+          <div class="row">
+            <div class="col-md-6">
+              {{#if Template.subscriptionsReady}}
+                {{#autoForm id="store-form" collection=collection doc=store
+                    type=type meteormethod=method
+                    singleMethodArgument=singleMethodArgument}}
+                  {{> afFieldInput name="accountId" value=accountId}}
+                  {{> afQuickField name="storeType"}}
+                  {{> afQuickField name="url"}}
+                  {{> afQuickField name="subscriptionOrderUrl"}}
+                  {{> afQuickField name="subscriptionPageUrl"}}
+                  {{> afQuickField name="customerDetailsUrl"}}
+                  {{> afQuickField name="customerOrdersUrl"}}
+                  {{> afQuickField name="webhookUrl"}}
+                  {{> afQuickField name="webServiceUrl"}}
+                  {{> afQuickField name="paymentServiceUrl"}}
+                  {{> afQuickField name="availableRenewalFrequencies"}}
+                  {{> afQuickField name="storeWsAuthUser"}}
+                  {{> afQuickField name="storeWsAuthPass"}}
+                  {{> afQuickField name="dateFormat"}}
+                  {{> afQuickField name="datePickerFormat"}}
+                  {{> afQuickField name="supportedCurrencies"}}
+                  {{> afQuickField name="subscriptionRenewalStartTime"}}
+                  {{> afQuickField name="disableRenewals"}}
+                  {{> afQuickField name="defaultShippingMethod"}}
+                  {{> afQuickField name="freeShippingMethod"}}
+                  {{> afQuickField name="freeShippingMinimum"}}
+                  {{> afQuickField name="freeTrialShippingMethod"}}
+                  <div class="text-right">
+                    <button type="submit" class="btn btn-primary btn-save">
+                      Save
+                    </button>
+                  </div>
+                {{/autoForm}}
+              {{else}}
+                Loading ...
+              {{/if}}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+</template>

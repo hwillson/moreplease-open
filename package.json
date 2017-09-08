@@ -1,0 +1,48 @@
+{
+  "name": "moreplease-open",
+  "private": true,
+  "devDependencies": {
+    "babel-eslint": "^7.0.0",
+    "eslint": "^4.5.0",
+    "eslint-config-airbnb": "^15.1.0",
+    "eslint-import-resolver-meteor": "^0.4.0",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-jsx-a11y": "^5.1.1",
+    "eslint-plugin-meteor": "^4.0.0",
+    "eslint-plugin-react": "^7.3.0"
+  },
+  "eslintConfig": {
+    "parser": "babel-eslint",
+    "parserOptions": {
+      "allowImportExportEverywhere": true
+    },
+    "plugins": [
+      "meteor"
+    ],
+    "extends": [
+      "airbnb",
+      "plugin:meteor/recommended"
+    ],
+    "rules": {
+      "import/no-extraneous-dependencies": "off",
+      "import/extensions": "off",
+      "import/no-unresolved": "off",
+      "import/first": "off",
+      "global-require": "off",
+      "meteor/no-session": "off",
+      "import/newline-after-import": "off",
+      "no-underscore-dangle": "off",
+      "import/no-duplicates": "off",
+      "object-shorthand": [
+        "error",
+        "always",
+        {
+          "avoidQuotes": false
+        }
+      ]
+    },
+    "settings": {
+      "import/resolver": "meteor"
+    }
+  }
+}

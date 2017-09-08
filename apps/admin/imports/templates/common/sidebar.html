@@ -1,0 +1,61 @@
+<template name="adminSidebar">
+  <aside class="main-sidebar">
+    <section class="sidebar">
+
+      <ul class="sidebar-menu">
+        <li class="header">ADMIN</li>
+        {{#if currentUser}}
+          <li class="{{isActiveRoute 'adminDashboard'}}">
+            <a href="{{pathFor 'adminDashboard'}}">
+              <i class="fa fa-dashboard"></i>
+              Dashboard
+            </a>
+          </li>
+          <li class="{{isActiveRoute 'adminSubscriptions'}}
+              {{isActiveRoute 'adminSubscription'}}">
+            <a href="{{pathFor 'adminSubscriptions'}}">
+              <i class="fa fa-users"></i> Subscriptions
+            </a>
+          </li>
+          <li class="{{isActiveRoute 'adminProducts'}}">
+            <a href="{{pathFor 'adminProducts'}}">
+              <i class="fa fa-shopping-cart"></i> Products
+            </a>
+          </li>
+          <li class="treeview">
+            <a href="#">
+              <i class="fa fa-gears"></i>
+              <span>Settings</span>
+              <i class="fa fa-angle-left pull-right"></i>
+            </a>
+            <ul class="treeview-menu">
+              <li class="{{isActiveRoute 'adminSettingsEmails'}}">
+                <a href="{{pathFor 'adminSettingsEmails'}}">
+                  Email
+                </a>
+              </li>
+              <li class="{{isActiveRoute 'adminSettingsStore'}}">
+                <a href="{{pathFor 'adminSettingsStore'}}">
+                  Store
+                </a>
+              </li>
+              <li class="{{isActiveRoute 'adminSettingsApi'}}">
+                <a href="{{pathFor 'adminSettingsApi'}}">
+                  API Keys
+                </a>
+              </li>
+            </ul>
+          </li>
+        {{else}}
+          <li class="{{isActiveRoute 'adminWelcome'}}">
+            <a href="{{pathFor 'adminWelcome'}}">
+              <i class="fa fa-child"></i>
+              Welcome
+            </a>
+          </li>
+        {{/if}}
+      </ul>
+
+    </section>
+  </aside>
+</template>

@@ -1,0 +1,29 @@
+<template name="adminSubscriptionOrders">
+  <h2>Subscription Order History</h2>
+  <div class="row">
+    <div class="col-md-8">
+      {{#if ordersExist}}
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Order Type</th>
+              <th>Order Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each orders}}
+              <tr>
+                <td><a href="{{orderUrl}}" target="_blank">{{orderId}}</a></td>
+                <td>{{orderTypeLabel}}</td>
+                <td>{{formatDate orderDate store.dateFormat}}</td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      {{else}}
+        <p>No orders have been placed.</p>
+      {{/if}}
+    </div>
+  </div>
+</template>

@@ -1,0 +1,209 @@
+<template name="adminSubscription">
+
+  <section class="content-header">
+    <h1>
+      <i class="fa fa-user"></i> Customer Subscription
+      <small>
+        (<a href="#" class="goto-subscriptions">
+          <i class="fa fa-angle-double-left"></i> back to list
+        </a>)
+      </small>
+    </h1>
+    <ol class="breadcrumb">
+      <li>
+        <a href="{{pathFor 'adminWelcome'}}">
+          <i class="fa fa-map"></i> Home
+        </a>
+      </li>
+      <li>
+        <a href="{{pathFor 'adminSubscriptions'}}">
+          Subscriptions
+        </a>
+      </li>
+      <li class="active">Subscription</li>
+    </ol>
+  </section>
+
+  <section class="content">
+    <div class="box box-default">
+      <div class="box-body">
+
+        {{#if Template.subscriptionsReady}}
+
+          {{#if subscription}}
+
+            {{#with subscription}}
+
+              <h2>Subscription Details</h2>
+              <div class="subscription-details row">
+                <div class="col-md-5">
+                  <form>
+                    <table class="table">
+                      <tbody>
+                        <tr>
+                          <th>Customer Name</th>
+                          <td>
+                            <a href="{{customerUrl}}"
+                              title="Click to see customer account"
+                              target="_blank">{{customerName}}</a>
+                            (<a href="{{customerOrdersUrl}}"
+                                title="Click to see all customer orders"
+                                target="_blank">All
+                              orders &raquo;</a>)
+                          </td>
+                        </tr>
+                        <tr>
+                          <th>Customer Email</th>
+                          <td><a href="mailto:{{customerEmail}}">{{customerEmail}}</a></td>
+                        </tr>
+                        <tr>
+                          <th>Subscription Total</th>
+                          <td>
+                            <strong>
+                              {{formatPrice subscriptionTotal currency}}
+                            </strong>
+                            {{#if shippingCost}}
+                              <span class="sub-shipping">
+                                ({{formatPrice subscriptionSubtotal currency}}
+                                + {{formatPrice shippingCost currency}} shipping)
+                              </span>
+                            {{/if}}
+                          </td>
+                        </tr>
+                        <tr>
+                          <th>Start Date</th>
+                          <td>{{formatDate startDate store.dateFormat}}</td>
+                        </tr>
+                        <tr>
+                          <th>Renewal Frequency</th>
+                          <td>
+                            <select
+                                class="form-control subscription-renewal-freq">
+                              {{#each availableRenewalFrequencies}}
+                                <option value="{{this}}">
+                                  {{frequencyLabel this}}
+                                </option>
+                              {{/each}}
+                            </select>
+                          </td>
+                        </tr>
+                        <tr>
+                          <th>Renewal Date</th>
+                          <td>
+                            <div class="input-group col-md-6">
+                              <input type="text"
+                                class="form-control subscription-renewal-date"
+                                value="{{formatDate renewalDate store.dateFormat}}">
+                              <span class="input-group-addon">
+                                <i class="fa fa-calendar"></i>
+                              </span>
+                            </div>
+                            <div class="subscription-renew-now-option">
+                              <a href="#" class="subscription-renew-now">
+                                Renew Immediately
+                              </a>
+                            </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <th>Subscription Status</th>
+                          <td>
+                            <span class="subscription-status subscription-{{statusId}}">
+                              {{subscriptionStatusLabel}}
+                            </span>
+                            <span class="subscription-controls">
+                              (<a href="#" class="subscription-pause">Pause</a><a href="#"
+                                class="u-hide subscription-resume">Resume</a>
+                              | <a href="#" class="subscription-cancel">Cancel</a>)
+                            </span>
+                            {{#if paymentFailed}}
+                              <div class="subscription-failed alert alert-danger">
+                                <i class="fa fa-exclamation-triangle"></i>
+                                This subscription has been paused due to payment failure.
+                              </div>
+                            {{/if}}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </form>
+                </div>
+              </div>
+
+              {{> adminSubscriptionOrders }}
+
+            {{/with}}
+
+            <h2>Subscription Items</h2>
+            <div class="row">
+              <div class="col-md-8">
+                {{#if subscriptionItemsExist}}
+
+                  <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th></th>
+                        <th>Item</th>
+                        <th>Quantity</th>
+                        <th>Total Price</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {{#each subscriptionItems}}
+                        {{#if productVariation}}
+                          <tr>
+                            <td class="subscription-item-image">
+                              {{#if productVariation.productImage}}
+                                <img src="{{imageUrl productVariation.productImage}}">
+                              {{/if}}
+                            </td>
+                            <td>
+                              <a href="{{store.url}}{{productVariation.productUrl}}" target="_blank">
+                                {{productVariation.productName}}
+                              </a>
+                              {{#if productVariation.variationName}}
+                                <p>
+                                  ({{{productVariation.variationName}}})
+                                </p>
+                              {{/if}}
+                              <p>
+                                Product ID: {{productVariation.productId}}<br/>
+                                {{#if productVariation.variationName}}
+                                  Variation ID: {{productVariation.variationId}}
+                                {{/if}}
+                              </p>
+                              {{#if note}}
+                                <p>{{note}}</p>
+                              {{/if}}
+                            </td>
+                            <td class="subscription-item-quantity">
+                              {{quantity}}
+                            </td>
+                            <td class="subscription-item-price">
+                              {{subscriptionItemPrice this}}
+                            </td>
+                          </tr>
+                        {{/if}}
+                      {{/each}}
+                    </tbody>
+                  </table>
+
+                {{else}}
+                  <p>You are not subscribed to any products.</p>
+                {{/if}}
+              </div>
+            </div>
+
+          {{else}}
+            No subscription found.
+          {{/if}}
+
+        {{else}}
+          Loading ...
+        {{/if}}
+
+      </div>
+    </div>
+  </section>
+
+</template>

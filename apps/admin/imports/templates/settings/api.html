@@ -1,0 +1,62 @@
+<template name="adminSettingsApi">
+
+  <div class="admin-account">
+
+    <section class="content-header">
+      <h1>
+        <i class="fa fa-gears"></i> Settings
+      </h1>
+      <ol class="breadcrumb">
+        <li>
+          <a href="{{pathFor 'adminDashbaord'}}">
+            <i class="fa fa-map"></i> Dashboard
+          </a>
+        </li>
+        <li>Settings</li>
+        <li class="active">API Keys</li>
+      </ol>
+    </section>
+
+    <section class="content">
+      <div class="box">
+        <div class="box-header with-border">
+          <h3 class="box-title">API Keys</h3>
+        </div>
+        <div class="box-body">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Key</th>
+                <th>Description</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#if Template.subscriptionsReady}}
+                {{#if apiKeysExist}}
+                  {{#each apiKeys}}
+                    <tr>
+                      <td>{{key}}</td>
+                      <td>{{description}}</td>
+                      <td>{{formatDateTime created}}</td>
+                    </tr>
+                  {{/each}}
+                {{else}}
+                  <tr>
+                    <td colspan="3">
+                      No keys.
+                    </td>
+                  </tr>
+                {{/if}}
+              {{else}}
+                Loading ...
+              {{/if}}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+</template>
