@@ -8,6 +8,10 @@ import '../../templates/welcome/welcome';
 import '../../templates/dashboard/dashboard';
 import '../../templates/subscriptions/subscriptions';
 import '../../templates/subscriptions/subscription';
+import '../../templates/products/products';
+import '../../templates/settings/emails';
+import '../../templates/settings/store';
+import '../../templates/settings/api';
 
 FlowRouter.route('/');
 
@@ -67,11 +71,11 @@ FlowRouter.route('/admin/products', {
   },
 });
 
-FlowRouter.route('/admin/settings/api', {
-  name: 'adminSettingsApi',
+FlowRouter.route('/admin/settings/email', {
+  name: 'adminSettingsEmails',
   triggersEnter: [ensureLoggedIn],
   action: () => {
-    BlazeLayout.render('adminLayout', { main: 'adminSettingsApi' });
+    BlazeLayout.render('adminLayout', { main: 'adminSettingsEmails' });
   },
 });
 
@@ -83,10 +87,10 @@ FlowRouter.route('/admin/settings/store', {
   },
 });
 
-FlowRouter.route('/admin/settings/email', {
-  name: 'adminSettingsEmails',
+FlowRouter.route('/admin/settings/api', {
+  name: 'adminSettingsApi',
   triggersEnter: [ensureLoggedIn],
   action: () => {
-    BlazeLayout.render('adminLayout', { main: 'adminSettingsEmails' });
+    BlazeLayout.render('adminLayout', { main: 'adminSettingsApi' });
   },
 });

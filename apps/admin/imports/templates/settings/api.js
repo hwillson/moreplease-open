@@ -1,21 +1,21 @@
-/* eslint func-names:0 */
+import { Template } from 'meteor/templating';
 
-Template.adminSettingsApi.onCreated(function () {
+import { apiKeysCollection } from 'meteor/moreplease:common';
+
+import './api.html';
+
+Template.adminSettingsApi.onCreated(function onCreated() {
   this.subscribe('apiKeys');
 });
 
-const getApiKeys = () => {
-  return MorePlease.collections.apiKeys.find();
-};
+const getApiKeys = () => apiKeysCollection.find();
 
 Template.adminSettingsApi.helpers({
-
-  apiKeysExist: () => {
+  apiKeysExist() {
     return getApiKeys().count();
   },
 
-  apiKeys: () => {
+  apiKeys() {
     return getApiKeys();
-  }
-
+  },
 });

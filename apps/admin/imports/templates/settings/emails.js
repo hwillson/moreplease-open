@@ -1,19 +1,18 @@
-/* eslint func-names:0 */
+import { Template } from 'meteor/templating';
+import { ReactiveVar } from 'meteor/reactive-var';
 
-Template.adminSettingsEmails.onCreated(function () {
+import { emailTestSchema } from 'meteor/moreplease:common';
+
+import './emails.html';
+import './email';
+
+Template.adminSettingsEmails.onCreated(function onCreated() {
   this.selectedEmailId = new ReactiveVar('');
 });
 
-// Template.adminSettingsEmails.onRendered(function () {
-//   this.$('#email-test-modal').on('shown.bs.modal', () => {
-//     this.$('.recipient-email').focus();
-//   });
-// });
-
 Template.adminSettingsEmails.helpers({
-
   testEmailSchema() {
-    return MorePlease.schemas.testEmail;
+    return emailTestSchema;
   },
 
   selectedEmailVar() {
@@ -22,19 +21,5 @@ Template.adminSettingsEmails.helpers({
 
   selectedEmailId() {
     return Template.instance().selectedEmailId.get();
-  }
-
+  },
 });
-
-// AutoForm.addHooks('email-form', {
-//   onSuccess() {
-//     sAlert.success('Email settings have been saved.');
-//   }
-// });
-//
-// AutoForm.addHooks('email-test-form', {
-//   onSuccess() {
-//     $('#email-test-modal').modal('hide');
-//     sAlert.success('Test email has been sent.');
-//   }
-// });

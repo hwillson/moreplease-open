@@ -1,29 +1,36 @@
-const getStore = () => {
-  return MorePlease.collections.stores.findOne();
-};
+import { Meteor } from 'meteor/meteor';
+import { Template } from 'meteor/templating';
+import { Spacebars } from 'meteor/spacebars';
+import { $ } from 'meteor/jquery';
+import { sweetAlert, swal } from 'meteor/kevohagan:sweetalert';
+import { _ } from 'meteor/underscore';
 
-/* eslint func-names:0 */
-Template.adminProducts.onCreated(function () {
+import { StoresCollection } from 'meteor/moreplease:common';
+
+import './products.html';
+
+const getStore = () => StoresCollection.findOne();
+
+Template.adminProducts.onCreated(function onCreated() {
   this.subscribe('store');
 });
 
 Template.adminProducts.helpers({
-
   settings() {
-
     const fields = [
       {
         key: 'productId',
-        label: 'Product ID'
+        label: 'Product ID',
       },
       {
         key: 'variationId',
-        label: 'Variation ID'
+        label: 'Variation ID',
       },
       {
         key: 'productImage',
         label: 'Product Image',
         fn(value) {
+          let newValue;
           if (value) {
             let imageUrl;
             if (value.indexOf('http') > -1) {
@@ -31,36 +38,41 @@ Template.adminProducts.helpers({
             } else {
               imageUrl = getStore().url + value;
             }
-            return new Spacebars.SafeString(
-              `<img src="${imageUrl}">`
+            newValue = new Spacebars.SafeString(
+              `<img src="${imageUrl}">`,
             );
           }
-        }
+          return newValue;
+        },
       },
       {
         key: 'productName',
         label: 'Product Name',
         fn(value, object) {
+          let newValue;
           if (value) {
             let productUrl = object.productUrl;
             if (productUrl.indexOf('http') === -1) {
               productUrl = getStore().url + productUrl;
             }
-            return new Spacebars.SafeString(
-              `<a href="${productUrl}" target="_blank">${value}</a>`
+            newValue = new Spacebars.SafeString(
+              `<a href="${productUrl}" target="_blank">${value}</a>`,
             );
           }
-        }
+          return newValue;
+        },
       },
       {
         key: 'variationName',
         label: 'Variation Name',
         fn(value) {
+          let newValue;
           if (value) {
-            return new Spacebars.SafeString(value);
+            newValue = new Spacebars.SafeString(value);
           }
-        }
-      }
+          return newValue;
+        },
+      },
     ];
 
     if (getStore().supportedCurrencies) {
@@ -68,33 +80,39 @@ Template.adminProducts.helpers({
         key: 'variationPriceInCurrency.GBP',
         label: 'Price (GBP)',
         fn(value) {
+          let newValue;
           if (value) {
-            return new Spacebars.SafeString(
-              '&pound;' + value.toFixed(2)
+            newValue = new Spacebars.SafeString(
+              `&pound;${value.toFixed(2)}`,
             );
           }
-        }
+          return newValue;
+        },
       });
       fields.push({
         key: 'variationPriceInCurrency.EUR',
         label: 'Price (EUR)',
         fn(value) {
+          let newValue;
           if (value) {
-            return new Spacebars.SafeString(
-              '&euro;' + value.toFixed(2)
+            newValue = new Spacebars.SafeString(
+              `&euro;${value.toFixed(2)}`,
             );
           }
-        }
+          return newValue;
+        },
       });
     } else {
       fields.push({
         key: 'variationPrice',
         label: 'Price',
         fn(value) {
+          let newValue;
           if (value) {
-            return '$' + value.toFixed(2);
+            newValue = `$${value.toFixed(2)}`;
           }
-        }
+          return newValue;
+        },
       });
     }
 
@@ -104,25 +122,22 @@ Template.adminProducts.helpers({
       fn() {
         return new Spacebars.SafeString(
           '<button class="btn btn-xs btn-danger remove-from-sub">'
-          + 'Remove From Subscriptions</button>'
+          + 'Remove From Subscriptions</button>',
         );
-      }
+      },
     });
 
     return {
       collection: 'productsTable',
       class: 'table table-striped col-sm-12',
-      fields
+      fields,
     };
-
-  }
-
+  },
 });
 
 Template.adminProducts.events({
-
-  'click .reactive-table tbody tr'(e) {
-    if ($(e.target).hasClass('remove-from-sub')) {
+  'click .reactive-table tbody tr'(event) {
+    if ($(event.target).hasClass('remove-from-sub')) {
       sweetAlert({
         title: 'Remove From Subscriptions?',
         text: 'Are you sure you want to remove this product from all subscriptions?',
@@ -132,7 +147,7 @@ Template.adminProducts.events({
         confirmButtonText: 'Remove',
         closeOnConfirm: false,
         confirmButtonColor: '#dd4b39',
-        animation: false
+        animation: false,
       }, _.bind(() => {
         $('.confirm').html('Removing...');
         Meteor.call(
@@ -141,10 +156,9 @@ Template.adminProducts.events({
           this.variationId,
           () => {
             swal('Product has been removed from all subscriptions.');
-          }
+          },
         );
       }, this));
     }
-  }
-
+  },
 });

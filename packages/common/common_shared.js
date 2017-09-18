@@ -38,6 +38,22 @@ import { subscriptionOrder, subscriptionOrdersCollection }
   from './domain/subscription_order';
 export { subscriptionOrder, subscriptionOrdersCollection };
 
-import { accountsCollection }
+import { accountsCollection, addStoreId }
   from './domain/account';
-export { accountsCollection };
+export { accountsCollection, addStoreId };
+
+import { emailsCollection }
+  from './emails/email';
+export { emailsCollection };
+
+import emailType
+  from './emails/email_type';
+export { emailType };
+
+import { emailTestSchema }
+  from './emails/email_test';
+export { emailTestSchema };
+
+import { apiKeysCollection }
+  from './api_access/api_key';
+export { apiKeysCollection };

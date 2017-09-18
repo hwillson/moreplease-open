@@ -1,24 +1,30 @@
-/* eslint func-names:0 */
+import { Meteor } from 'meteor/meteor';
+import { Template } from 'meteor/templating';
+import { ReactiveVar } from 'meteor/reactive-var';
+import { $ } from 'meteor/jquery';
+import { AutoForm } from 'meteor/aldeed:autoform';
+import { sAlert } from 'meteor/juliancwirko:s-alert';
 
-const getEmail = (emailType) => {
-  return MorePlease.collections.emails.findOne({
-    emailType
-  });
-};
+import {
+  emailsCollection,
+  emailType as emailCategoryType,
+  StoresCollection,
+} from 'meteor/moreplease:common';
 
-const getFormId = (emailType) => {
-  return 'email-form-' + emailType;
-};
+import './email.html';
 
-Template.adminSettingsEmail.onCreated(function () {
+const getEmail = emailType => emailsCollection.findOne({ emailType });
+
+const getFormId = emailType => `email-form-${emailType}`;
+
+Template.adminSettingsEmail.onCreated(function onCreated() {
   this.previewContent = new ReactiveVar('');
   this.subscribe('userData');
   this.subscribe('store');
   this.subscribe('email', this.data.emailType);
 });
 
-Template.adminSettingsEmail.onRendered(function () {
-
+Template.adminSettingsEmail.onRendered(function onRendered() {
   this.autorun(() => {
     if (this.subscriptionsReady()) {
       Meteor.defer(() => {
@@ -30,17 +36,15 @@ Template.adminSettingsEmail.onRendered(function () {
   this.$('#email-test-modal').on('shown.bs.modal', () => {
     this.$('.recipient-email').focus();
   });
-
 });
 
 Template.adminSettingsEmail.helpers({
-
   storeId() {
-    return MorePlease.collections.stores.findOne()._id;
+    return StoresCollection.findOne()._id;
   },
 
   collection() {
-    return MorePlease.collections.emails;
+    return emailsCollection;
   },
 
   email() {
@@ -58,7 +62,7 @@ Template.adminSettingsEmail.helpers({
   },
 
   singleMethodArgument() {
-    return getEmail(this.emailType) ? true : false;
+    return getEmail(this.emailType);
   },
 
   emailType() {
@@ -67,10 +71,9 @@ Template.adminSettingsEmail.helpers({
 
   emailTitle() {
     let emailTitle;
-    if (this.emailType === MorePlease.models.emailType.reminder.id) {
+    if (this.emailType === emailCategoryType.reminder.id) {
       emailTitle = 'Renewal Reminder Email';
-    } else if (this.emailType ===
-        MorePlease.models.emailType.paymentFailed.id) {
+    } else if (this.emailType === emailCategoryType.paymentFailed.id) {
       emailTitle = 'Payment Failed Email';
     }
     return emailTitle;
@@ -78,12 +81,11 @@ Template.adminSettingsEmail.helpers({
 
   emailDescription() {
     let emailDescription;
-    if (this.emailType === MorePlease.models.emailType.reminder.id) {
+    if (this.emailType === emailCategoryType.reminder.id) {
       emailDescription =
         'This email will be sent to customers <strong>5 days</strong> before '
         + 'their subscription renews.';
-    } else if (this.emailType ===
-        MorePlease.models.emailType.paymentFailed.id) {
+    } else if (this.emailType === emailCategoryType.paymentFailed.id) {
       emailDescription =
         'This email will be sent to customers immediately after a renewal '
         + 'payment has failed (it will only be sent once).';
@@ -97,32 +99,29 @@ Template.adminSettingsEmail.helpers({
 
   previewContent() {
     return Template.instance().previewContent.get();
-  }
-
+  },
 });
 
 Template.adminSettingsEmail.events({
-
-  'keyup textarea'(event, instance) {
-    instance.previewContent.set($(event.currentTarget).val());
+  'keyup textarea'(event, templateInstance) {
+    templateInstance.previewContent.set($(event.currentTarget).val());
   },
 
-  'click .js-test-email'(event, instance) {
-    const email = getEmail(instance.data.emailType);
-    instance.data.selectedEmailVar.set(email._id);
-  }
-
+  'click .js-test-email'(event, templateInstance) {
+    const email = getEmail(templateInstance.data.emailType);
+    templateInstance.data.selectedEmailVar.set(email._id);
+  },
 });
 
 AutoForm.addHooks(['email-form-reminder', 'email-form-paymentFailed'], {
   onSuccess() {
     sAlert.success('Email settings have been saved.');
-  }
+  },
 });
 
 AutoForm.addHooks('email-test-form', {
   onSuccess() {
     $('#email-test-modal').modal('hide');
     sAlert.success('Test email has been sent.');
-  }
+  },
 });

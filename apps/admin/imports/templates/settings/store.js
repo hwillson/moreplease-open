@@ -1,19 +1,23 @@
-/* eslint func-names:0 */
+import { Meteor } from 'meteor/meteor';
+import { Template } from 'meteor/templating';
+import { sAlert } from 'meteor/juliancwirko:s-alert';
+import { AutoForm } from 'meteor/aldeed:autoform';
 
-const getStore = () => {
-  return MorePlease.collections.stores.findOne();
-};
+import { StoresCollection, addStoreId } from 'meteor/moreplease:common';
 
-Template.adminSettingsStore.onCreated(function () {
+import './store.html';
+
+const getStore = () => StoresCollection.findOne();
+
+Template.adminSettingsStore.onCreated(function onCreated() {
   this.subscribe('userData');
   this.subscribe('account');
   this.subscribe('store');
 });
 
 Template.adminSettingsStore.helpers({
-
   collection() {
-    return MorePlease.collections.stores;
+    return StoresCollection;
   },
 
   accountId() {
@@ -35,14 +39,13 @@ Template.adminSettingsStore.helpers({
   },
 
   singleMethodArgument() {
-    return getStore() ? true : false;
-  }
-
+    return getStore() !== undefined;
+  },
 });
 
 AutoForm.addHooks('store-form', {
   onSuccess() {
     sAlert.success('Store settings have been saved.');
-    MorePlease.methods.account.addStoreId.call({ storeId: getStore()._id });
-  }
+    addStoreId.call({ storeId: getStore()._id });
+  },
 });
