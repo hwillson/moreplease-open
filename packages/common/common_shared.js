@@ -57,3 +57,5 @@ export { emailTestSchema };
 import { apiKeysCollection }
   from './api_access/api_key';
 export { apiKeysCollection };
+
+export date from './utilities/date';

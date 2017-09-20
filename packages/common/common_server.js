@@ -26,3 +26,10 @@ import './publications/store';
 import dailySummaryEmail
   from './reporting/daily_summary_email';
 export { dailySummaryEmail };
+
+import apiAccess
+  from './api_access/api_access';
+export { apiAccess };
+
+import transmitEvent from './webhook/transmit_event';
+export { transmitEvent };

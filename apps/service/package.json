@@ -1,0 +1,14 @@
+{
+  "name": "service",
+  "private": true,
+  "scripts": {
+    "start": "MONGO_URL=mongodb://127.0.0.1:3101/meteor meteor --port 3200 --settings=/Users/hwillson/Documents/git/octonary/config/moreplease-open/service/settings_local.json"
+  },
+  "dependencies": {
+    "babel-runtime": "^6.20.0",
+    "body-parser": "^1.18.1",
+    "meteor-node-stubs": "~0.2.4",
+    "moment": "^2.18.1",
+    "path-to-regexp": "^2.0.0"
+  }
+}

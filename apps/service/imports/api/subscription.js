@@ -1,0 +1,278 @@
+import moment from 'moment';
+
+import {
+  SubscriptionsCollection,
+  ProductsCollection,
+  date as dateUtil,
+  SubscriptionStatus,
+  SubscriptionManager,
+  subscriptionRenewalFrequency,
+  subscriptionHistoryCollection,
+  SubscriptionItemsCollection,
+  subscriptionOrdersCollection,
+  StoresCollection,
+  transmitEvent,
+} from 'meteor/moreplease:common';
+import createCustomer from './customer';
+
+export const createSubscription = ({ storeId, subscriptionData }) => {
+  let subscriptionId;
+  if (storeId
+    && subscriptionData.subscription
+    && subscriptionData.subscriptionItems
+  ) {
+    const customer = subscriptionData.customer;
+    customer.storeId = storeId;
+    const customerId = createCustomer(customer);
+
+    const renewalFrequencyId =
+      subscriptionData.subscription.renewalFrequencyId
+        ? subscriptionData.subscription.renewalFrequencyId
+        : subscriptionRenewalFrequency.m1.id;
+
+    const startDate =
+      subscriptionData.subscription.migratedStartDate
+        ? moment(subscriptionData.subscription.migratedStartDate)
+        : moment();
+
+    let renewalDate;
+    if (subscriptionData.subscription.migratedRenewalDate) {
+      renewalDate = dateUtil.newMomentWithDefaultTime(
+        subscriptionData.subscription.migratedRenewalDate,
+      );
+      if (renewalDate.isBefore(moment())) {
+        renewalDate = dateUtil.newMomentWithDefaultTime().add(1, 'days');
+      }
+    } else if (subscriptionData.includesFreeTrial) {
+      // New subscription includes a free trial product, so set the next
+      // renewal to fire in 14 days.
+      renewalDate = dateUtil.newMomentWithDefaultTime().add(14, 'days');
+    } else {
+      renewalDate = subscriptionRenewalFrequency.renewalDateForFrequency(
+        renewalFrequencyId,
+      );
+    }
+
+    const subscription = {
+      storeId,
+      customerId,
+      customerFirstName: subscriptionData.customer.firstName,
+      customerLastName: subscriptionData.customer.lastName,
+      customerEmail: subscriptionData.customer.email,
+      startDate: startDate.toDate(),
+      renewalFrequencyId,
+      renewalDate: renewalDate.toDate(),
+      statusId: SubscriptionStatus.active.id,
+      shippingMethodId: subscriptionData.subscription.shippingMethodId,
+      shippingMethodName: subscriptionData.subscription.shippingMethodName,
+      shippingCost: subscriptionData.subscription.shippingCost,
+    };
+
+    if (subscriptionData.subscription.currency) {
+      subscription.currency = subscriptionData.subscription.currency;
+    }
+
+    subscriptionId = SubscriptionsCollection.insert(subscription);
+    subscriptionHistoryCollection.insert({
+      subscriptionId,
+      timestamp: new Date(),
+      statusId: subscription.statusId,
+      storeId,
+    });
+
+    const subscriptionItems = subscriptionData.subscriptionItems;
+    subscriptionItems.forEach((subscriptionItem) => {
+      const newSubItem = subscriptionItem;
+      newSubItem.subscriptionId = subscriptionId;
+      newSubItem.storeId = storeId;
+      SubscriptionItemsCollection.insert(newSubItem);
+    });
+
+    if (subscriptionData.order) {
+      const order = subscriptionData.order;
+      order.subscriptionId = subscriptionId;
+      order.storeId = storeId;
+      subscriptionOrdersCollection.insert(order);
+    }
+
+    if (subscriptionData.sendSubscriptionIdToStore) {
+      SubscriptionManager.sendSubscriptionDetailsToStore({
+        storeId,
+        subscriptionId,
+        customer,
+      });
+    }
+
+    const newSubscription =
+      SubscriptionsCollection.findOne({ _id: subscriptionId });
+
+    // Fire "New Subscription" event
+    const store = StoresCollection.findOne({ _id: subscription.storeId });
+    transmitEvent({
+      store,
+      event: 'New Subscription',
+      extra: {
+        subscriptionId,
+        subscriptionStatus: newSubscription.statusId,
+        customerEmail: newSubscription.customerEmail,
+        externalCustomerId: customer.externalId,
+        nextShipmentDate: newSubscription.renewalDate,
+        totalSubscriptionPrice:
+          +newSubscription.subscriptionTotal().toFixed(2),
+        subscriptionItems: newSubscription.getSubscriptionItems(),
+        isFreeTrial: newSubscription.isFreeTrialSubscription(),
+      },
+    });
+  }
+
+  return subscriptionId;
+};
+
+const prepareSubscriptionData = subscription => ({
+  subscriptionId: subscription._id,
+  startDate: subscription.startDate,
+  renewalFrequencyId: subscription.renewalFrequencyId,
+  renewalDate: subscription.renewalDate,
+  statusId: subscription.statusId,
+  subtotal: +subscription.subscriptionSubtotal().toFixed(2),
+  shipping: +subscription.getShippingCost().toFixed(2),
+  total: +subscription.subscriptionTotal().toFixed(2),
+});
+
+const prepareCustomerData = (subscription) => {
+  const customer = subscription.getCustomer();
+  return {
+    customer: {
+      customerId: customer._id,
+      externalId: customer.externalId,
+      email: customer.email,
+      firstName: customer.firstName,
+      lastName: customer.lastName,
+    },
+  };
+};
+
+const prepareSubscriptionItems = (subscription) => {
+  let data;
+  const subscriptionItems = subscription.getSubscriptionItems();
+  if (subscriptionItems) {
+    const productVariations = {};
+    const items = subscriptionItems.map((item) => {
+      const productVariation = item.productVariation();
+
+      if (!productVariations[item.productId]) {
+        const variations = {};
+        ProductsCollection.findProductVariations(item.productId).forEach(
+          (variation) => {
+            variations[variation.variationId] = {
+              name: variation.variationName,
+              image: variation.productImage,
+              price: variation.variationPrice,
+            };
+          },
+        );
+        productVariations[item.productId] = variations;
+      }
+
+      return {
+        itemId: item._id,
+        productId: item.productId,
+        productName: productVariation.productName,
+        variationId: item.variationId,
+        quantity: item.quantity,
+        individualPrice: +item.price().toFixed(2),
+        totalPrice: +item.totalPrice().toFixed(2),
+        discountedTotalPrice: +item.totalDiscountedPrice().toFixed(2),
+        image: productVariation.productImage,
+        variations: productVariations[item.productId],
+      };
+    });
+    data = {
+      items,
+    };
+  }
+  return data;
+};
+
+export const readSubscription = ({ storeId, subscriptionId }) => {
+  let subscriptionData;
+  if (storeId && subscriptionId) {
+    const subscription =
+      SubscriptionsCollection.findOne({ _id: subscriptionId, storeId });
+    if (subscription) {
+      subscriptionData = Object.assign(
+        prepareSubscriptionData(subscription),
+        prepareCustomerData(subscription),
+        prepareSubscriptionItems(subscription),
+      );
+    }
+  }
+  return subscriptionData;
+};
+
+export const updateSubscription = ({ storeId, subscriptionId, subscriptionData }) => {
+  if (storeId && subscriptionId && subscriptionData) {
+    const subscription =
+      SubscriptionsCollection.findOne({ _id: subscriptionId });
+    if (subscriptionData.statusId) {
+      subscription.updateSubscriptionStatus(subscriptionData.statusId);
+    }
+
+    const updateData = {};
+    if (subscriptionData.renewalFrequencyId) {
+      updateData.renewalFrequencyId = subscriptionData.renewalFrequencyId;
+    }
+    if (subscriptionData.renewalDate) {
+      let renewalDate =
+        dateUtil.newMomentWithDefaultTime(subscriptionData.renewalDate);
+      if (renewalDate.isBefore(moment())) {
+        renewalDate = dateUtil.newMomentWithDefaultTime().add(1, 'days');
+      }
+      updateData.renewalDate = renewalDate.toDate();
+    }
+
+    if (Object.keys(updateData).length) {
+      SubscriptionsCollection.update({
+        _id: subscriptionId,
+        storeId,
+      }, {
+        $set: updateData,
+      });
+    }
+  }
+};
+
+export const subscriptionStatus = ({ storeId, subscriptionId }) => {
+  let subscriptionData;
+  if (storeId && subscriptionId) {
+    const subscription =
+      SubscriptionsCollection.findOne({ _id: subscriptionId, storeId });
+    if (subscription) {
+      subscriptionData = {
+        subscriptionId: subscription._id,
+        statusId: subscription.statusId,
+        renewalDayCount: moment(subscription.renewalDate).diff(moment(), 'days'),
+        renewalDate: subscription.renewalDate,
+        renewalDateLong: dateUtil.formatLongDate(subscription.renewalDate),
+      };
+    }
+  }
+  return subscriptionData;
+};
+
+export const renewSubscription = ({ storeId, subscriptionId }) => {
+  let renewedSuccessfuly = false;
+  if (storeId && subscriptionId) {
+    const subscription = SubscriptionsCollection.findOne({
+      _id: subscriptionId,
+    });
+
+    if (subscription
+        && subscription.statusId === SubscriptionStatus.failed.id) {
+      renewedSuccessfuly = SubscriptionManager.createSubscriptionRenewal(
+        subscriptionId,
+      );
+    }
+  }
+  return { renewedSuccessfuly };
+};
