@@ -27,11 +27,13 @@ const getStoreId = (authHeader) => {
   return storeId;
 };
 
-const haveAccess = (authHeader, callback) => {
+const haveAccess = (authHeader, successCallback, errorCallback) => {
   const storeId = getStoreId(authHeader);
   let result;
   if (storeId) {
-    result = callback(storeId);
+    result = successCallback(storeId);
+  } else {
+    result = errorCallback();
   }
   return result;
 };
@@ -100,25 +102,39 @@ const app = WebApp.rawConnectHandlers;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use((req, res) => {
+app.use((req, res, next) => {
+  let serviceRouteMatch = false;
   Object.keys(endpoints).forEach((endpointPath) => {
     const tokens = pathToRegexp(endpointPath).exec(req.url);
     if (tokens) {
+      serviceRouteMatch = true;
       const id = tokens[1];
       const handler = endpoints[endpointPath][req.method];
 
       Promise.resolve().then(() => {
+        let responseStatusCode = 200;
         let responseData;
         haveAccess(
           req.headers.authorization,
           (storeId) => {
             responseData = handler(req, storeId, id);
           },
+          () => {
+            responseStatusCode = 401;
+            responseData = {
+              msg: 'Unauthorized',
+            };
+          },
         );
         const response = res;
         setHeaders(req, response);
+        response.statusCode = responseStatusCode;
         response.end(JSON.stringify(responseData));
       });
     }
   });
+
+  if (!serviceRouteMatch) {
+    next();
+  }
 });

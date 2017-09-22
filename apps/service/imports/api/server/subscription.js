@@ -125,15 +125,15 @@ export const createSubscription = ({ storeId, subscriptionData }) => {
     });
   }
 
-  return subscriptionId;
+  return { subscriptionId };
 };
 
 const prepareSubscriptionData = subscription => ({
   subscriptionId: subscription._id,
-  startDate: subscription.startDate,
+  startDate: subscription.startDate || null,
   renewalFrequencyId: subscription.renewalFrequencyId,
-  renewalDate: subscription.renewalDate,
-  statusId: subscription.statusId,
+  renewalDate: subscription.renewalDate || null,
+  statusId: subscription.statusId || null,
   subtotal: +subscription.subscriptionSubtotal().toFixed(2),
   shipping: +subscription.getShippingCost().toFixed(2),
   total: +subscription.subscriptionTotal().toFixed(2),
@@ -141,15 +141,19 @@ const prepareSubscriptionData = subscription => ({
 
 const prepareCustomerData = (subscription) => {
   const customer = subscription.getCustomer();
-  return {
-    customer: {
-      customerId: customer._id,
-      externalId: customer.externalId,
-      email: customer.email,
-      firstName: customer.firstName,
-      lastName: customer.lastName,
-    },
-  };
+  let customerData;
+  if (customer) {
+    customerData = {
+      customer: {
+        customerId: customer._id,
+        externalId: customer.externalId,
+        email: customer.email,
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+      },
+    };
+  }
+  return customerData;
 };
 
 const prepareSubscriptionItems = (subscription) => {

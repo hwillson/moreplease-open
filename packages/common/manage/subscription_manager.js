@@ -91,9 +91,11 @@ const SubscriptionManager = {
               variationName: product.variationName,
             });
           });
-
           if (subscriptionItems.length > 0) {
             switch (store.storeType) {
+              case (StoreType.codes.test.id):
+                renewedSuccessfuly = true;
+                break;
               case (StoreType.codes.shopify.id):
                 renewedSuccessfuly = this._createSubscriptionRenewalShopify({
                   store,

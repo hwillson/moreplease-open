@@ -59,3 +59,5 @@ import { apiKeysCollection }
 export { apiKeysCollection };
 
 export date from './utilities/date';
+
+import './webhook/methods';

@@ -8,6 +8,10 @@ const StoreType = {
       id: 'shopify',
       label: 'Shopify',
     },
+    test: {
+      id: 'test',
+      label: 'Test',
+    },
   },
 
   labelValues() {

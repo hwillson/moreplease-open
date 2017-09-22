@@ -30,7 +30,8 @@ export const createSubscriptionItem = ({
     subscriptionData = {
       subscription: {
         subtotal: +subscription.subscriptionSubtotal().toFixed(2),
-        shipping: +subscription.shippingCost.toFixed(2),
+        shipping:
+          subscription.shippingCost ? +subscription.shippingCost.toFixed(2) : 0,
         total: +subscription.subscriptionTotal().toFixed(2),
       },
     };
@@ -81,7 +82,8 @@ export const updateSubscriptionItem = ({ storeId, itemId, itemData }) => {
       subscriptionData = {
         subscription: {
           subtotal: +subscription.subscriptionSubtotal().toFixed(2),
-          shipping: +subscription.shippingCost.toFixed(2),
+          shipping:
+            subscription.shippingCost ? +subscription.shippingCost.toFixed(2) : 0,
           total: +subscription.subscriptionTotal().toFixed(2),
         },
         subscriptionItem: {
@@ -122,7 +124,8 @@ export const deleteSubscriptionItem = ({ storeId, itemId }) => {
       subscriptionData = {
         subscription: {
           subtotal: +subscription.subscriptionSubtotal().toFixed(2),
-          shipping: +subscription.shippingCost.toFixed(2),
+          shipping:
+            subscription.shippingCost ? +subscription.shippingCost.toFixed(2) : 0,
           total: +subscription.subscriptionTotal().toFixed(2),
         },
       };

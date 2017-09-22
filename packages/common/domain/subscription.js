@@ -132,7 +132,8 @@ const Subscription = {
         subscriptionId: this._id,
         subscriptionStatus: statusId,
         customerEmail: this.customerEmail,
-        externalCustomerId: this.getCustomer().externalId,
+        externalCustomerId:
+          this.getCustomer() ? this.getCustomer().externalId : null,
         nextShipmentDate: this.renewalDate,
         totalSubscriptionPrice: +this.subscriptionTotal().toFixed(2),
         subscriptionItems: this.getSubscriptionItems(),
