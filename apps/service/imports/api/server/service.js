@@ -1,3 +1,5 @@
+import { Meteor } from 'meteor/meteor';
+import Raven from 'raven';
 import { WebApp } from 'meteor/webapp';
 import bodyParser from 'body-parser';
 import pathToRegexp from 'path-to-regexp';
@@ -16,6 +18,10 @@ import {
   updateSubscriptionItem,
   deleteSubscriptionItem as removeSubscriptionItem,
 } from './subscription_item';
+
+Raven.config(Meteor.settings.private.sentry.dsn, {
+  environment: Meteor.isProduction ? 'production' : 'development',
+}).install();
 
 const getStoreId = (authHeader) => {
   let storeId;
@@ -117,7 +123,18 @@ app.use((req, res, next) => {
         haveAccess(
           req.headers.authorization,
           (storeId) => {
-            responseData = handler(req, storeId, id);
+            try {
+              responseData = handler(req, storeId, id);
+            } catch (error) {
+              Raven.setContext({
+                tags: {
+                  service_path: endpointPath,
+                  service_id: id,
+                  service_store_id: storeId,
+                },
+              });
+              Raven.captureException(error);
+            }
           },
           () => {
             responseStatusCode = 401;
