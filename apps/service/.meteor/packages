@@ -19,3 +19,4 @@ shell-server@0.2.4            # Server-side component of the `meteor shell` comm
 
 moreplease:common
 practicalmeteor:mocha
+mdg:meteor-apm-agent
