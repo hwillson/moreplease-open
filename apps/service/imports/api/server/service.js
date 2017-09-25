@@ -46,11 +46,13 @@ const haveAccess = (authHeader, successCallback, errorCallback) => {
 
 const setHeaders = (request, response) => {
   response.setHeader('Content-Type', 'application/json');
-  // const allowedOrigins = Meteor.settings.private.cors.allowedOrigins;
-  // const origin = request.headers.origin;
-  // if (allowedOrigins.indexOf(origin) > -1) {
-  //   response.setHeader('Access-Control-Allow-Origin', origin);
-  // }
+  if (Meteor.settings.private.cors) {
+    const allowedOrigins = Meteor.settings.private.cors.allowedOrigins;
+    const origin = request.headers.origin;
+    if (allowedOrigins.indexOf(origin) > -1) {
+      response.setHeader('Access-Control-Allow-Origin', origin);
+    }
+  }
 };
 
 const endpoints = {
