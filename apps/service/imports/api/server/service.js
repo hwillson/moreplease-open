@@ -37,7 +37,7 @@ const haveAccess = (request, successCallback, errorCallback) => {
   const authHeader = request.headers.authorization;
   const storeId = getStoreId(authHeader);
   let result;
-  if (storeId || request.method === 'OPTIONS') {
+  if (storeId) {
     result = successCallback(storeId);
   } else {
     result = errorCallback();
@@ -121,46 +121,50 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use((req, res, next) => {
   let serviceRouteMatch = false;
-  Object.keys(endpoints).forEach((endpointPath) => {
-    const tokens = pathToRegexp(endpointPath).exec(req.url);
-    if (tokens) {
-      serviceRouteMatch = true;
-      const id = tokens[1];
-      const handler = endpoints[endpointPath][req.method];
+  if (req.method === 'OPTIONS') {
+    res.end();
+  } else {
+    Object.keys(endpoints).forEach((endpointPath) => {
+      const tokens = pathToRegexp(endpointPath).exec(req.url);
+      if (tokens) {
+        serviceRouteMatch = true;
+        const id = tokens[1];
+        const handler = endpoints[endpointPath][req.method];
 
-      Promise.resolve().then(() => {
-        let responseStatusCode = 200;
-        let responseData;
-        haveAccess(
-          req,
-          (storeId) => {
-            try {
-              responseData = handler(req, storeId, id);
-            } catch (error) {
-              Raven.setContext({
-                tags: {
-                  service_path: endpointPath,
-                  service_id: id,
-                  service_store_id: storeId,
-                },
-              });
-              Raven.captureException(error);
-            }
-          },
-          () => {
-            responseStatusCode = 401;
-            responseData = {
-              msg: 'Unauthorized',
-            };
-          },
-        );
-        const response = res;
-        setHeaders(req, response);
-        response.statusCode = responseStatusCode;
-        response.end(JSON.stringify(responseData));
-      });
-    }
-  });
+        Promise.resolve().then(() => {
+          let responseStatusCode = 200;
+          let responseData;
+          haveAccess(
+            req,
+            (storeId) => {
+              try {
+                responseData = handler(req, storeId, id);
+              } catch (error) {
+                Raven.setContext({
+                  tags: {
+                    service_path: endpointPath,
+                    service_id: id,
+                    service_store_id: storeId,
+                  },
+                });
+                Raven.captureException(error);
+              }
+            },
+            () => {
+              responseStatusCode = 401;
+              responseData = {
+                msg: 'Unauthorized',
+              };
+            },
+          );
+          const response = res;
+          setHeaders(req, response);
+          response.statusCode = responseStatusCode;
+          response.end(JSON.stringify(responseData));
+        });
+      }
+    });
+  }
 
   if (!serviceRouteMatch) {
     next();
