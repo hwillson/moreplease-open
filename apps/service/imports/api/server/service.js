@@ -120,9 +120,11 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use((req, res, next) => {
+  const response = res;
   let serviceRouteMatch = false;
   if (req.method === 'OPTIONS') {
-    res.end();
+    setHeaders(req, response);
+    response.end();
   } else {
     Object.keys(endpoints).forEach((endpointPath) => {
       const tokens = pathToRegexp(endpointPath).exec(req.url);
@@ -157,7 +159,6 @@ app.use((req, res, next) => {
               };
             },
           );
-          const response = res;
           setHeaders(req, response);
           response.statusCode = responseStatusCode;
           response.end(JSON.stringify(responseData));
