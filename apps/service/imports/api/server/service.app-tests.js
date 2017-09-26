@@ -259,6 +259,19 @@ describe('imports.api.service', function () {
     });
   });
 
+  describe('OPTIONS /subscriptions/:subscriptionId/status', function () {
+    it('should return preflight options', function () {
+      return Promise.resolve().then(() => {
+        const subscription = SubscriptionsCollection.findOne();
+        const response = HTTP.call(
+          'OPTIONS',
+          `${HOST}/subscriptions/${subscription._id}/status`,
+        );
+        expect(response).to.not.be.empty;
+      });
+    });
+  });
+
   describe('GET /subscriptions/:subscriptionId/status', function () {
     it('should retrieve the subscription status', function () {
       return Promise.resolve().then(() => {

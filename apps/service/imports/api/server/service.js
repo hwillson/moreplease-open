@@ -33,10 +33,11 @@ const getStoreId = (authHeader) => {
   return storeId;
 };
 
-const haveAccess = (authHeader, successCallback, errorCallback) => {
+const haveAccess = (request, successCallback, errorCallback) => {
+  const authHeader = request.headers.authorization;
   const storeId = getStoreId(authHeader);
   let result;
-  if (storeId) {
+  if (storeId || request.method === 'OPTIONS') {
     result = successCallback(storeId);
   } else {
     result = errorCallback();
@@ -131,7 +132,7 @@ app.use((req, res, next) => {
         let responseStatusCode = 200;
         let responseData;
         haveAccess(
-          req.headers.authorization,
+          req,
           (storeId) => {
             try {
               responseData = handler(req, storeId, id);
