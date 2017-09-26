@@ -46,6 +46,14 @@ const haveAccess = (authHeader, successCallback, errorCallback) => {
 
 const setHeaders = (request, response) => {
   response.setHeader('Content-Type', 'application/json');
+  response.setHeader(
+    'Access-Control-Allow-Methods',
+    'POST, OPTIONS, DELETE, PUT',
+  );
+  response.setHeader(
+    'Access-Control-Allow-Headers',
+    'Content-Type, Authorization, X-Requested-With',
+  );
   if (Meteor.settings.private.cors) {
     const allowedOrigins = Meteor.settings.private.cors.allowedOrigins;
     const origin = request.headers.origin;
