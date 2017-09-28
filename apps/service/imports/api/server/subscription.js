@@ -215,35 +215,41 @@ export const readSubscription = ({ storeId, subscriptionId }) => {
 };
 
 export const updateSubscription = ({ storeId, subscriptionId, subscriptionData }) => {
+  let updated = false;
   if (storeId && subscriptionId && subscriptionData) {
     const subscription =
       SubscriptionsCollection.findOne({ _id: subscriptionId });
-    if (subscriptionData.statusId) {
-      subscription.updateSubscriptionStatus(subscriptionData.statusId);
-    }
-
-    const updateData = {};
-    if (subscriptionData.renewalFrequencyId) {
-      updateData.renewalFrequencyId = subscriptionData.renewalFrequencyId;
-    }
-    if (subscriptionData.renewalDate) {
-      let renewalDate =
-        dateUtil.newMomentWithDefaultTime(subscriptionData.renewalDate);
-      if (renewalDate.isBefore(moment())) {
-        renewalDate = dateUtil.newMomentWithDefaultTime().add(1, 'days');
+    if (subscription) {
+      if (subscriptionData.statusId) {
+        subscription.updateSubscriptionStatus(subscriptionData.statusId);
       }
-      updateData.renewalDate = renewalDate.toDate();
-    }
 
-    if (Object.keys(updateData).length) {
-      SubscriptionsCollection.update({
-        _id: subscriptionId,
-        storeId,
-      }, {
-        $set: updateData,
-      });
+      const updateData = {};
+      if (subscriptionData.renewalFrequencyId) {
+        updateData.renewalFrequencyId = subscriptionData.renewalFrequencyId;
+      }
+      if (subscriptionData.renewalDate) {
+        let renewalDate =
+          dateUtil.newMomentWithDefaultTime(subscriptionData.renewalDate);
+        if (renewalDate.isBefore(moment())) {
+          renewalDate = dateUtil.newMomentWithDefaultTime().add(1, 'days');
+        }
+        updateData.renewalDate = renewalDate.toDate();
+      }
+
+      if (Object.keys(updateData).length) {
+        const updateCount = SubscriptionsCollection.update({
+          _id: subscriptionId,
+          storeId,
+        }, {
+          $set: updateData,
+        });
+        updated = !!updateCount;
+      }
     }
   }
+
+  return { updated };
 };
 
 export const subscriptionStatus = ({ storeId, subscriptionId }) => {
