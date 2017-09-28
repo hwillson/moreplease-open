@@ -116,9 +116,7 @@ const endpoints = {
 
 const app = WebApp.rawConnectHandlers;
 
-// TODO - figure out bodyParser usage ...
 app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use((req, res, next) => {
   const response = res;
