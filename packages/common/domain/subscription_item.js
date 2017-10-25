@@ -33,6 +33,7 @@ const SubscriptionItemSchema = new SimpleSchema({
     type: Number,
     label: 'Discount Percent',
     optional: true,
+    decimal: true,
   },
   storeId: {
     type: String,
