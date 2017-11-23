@@ -354,6 +354,24 @@ const Subscription = {
       },
     });
   },
+
+  daysSinceFirstOrder() {
+    const firstOrder = subscriptionOrdersCollection.findOne({
+      subscriptionId: this._id,
+    }, {
+      sort: {
+        orderDate: 1,
+      },
+    });
+    return moment().diff(moment(firstOrder.orderDate), 'days');
+  },
+
+  renewalCount() {
+    const orderCount = subscriptionOrdersCollection.find({
+      subscriptionId: this._id,
+    }).count();
+    return orderCount ? orderCount - 1 : 0;
+  },
 };
 
 export { Subscription };

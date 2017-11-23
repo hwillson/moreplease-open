@@ -40,6 +40,8 @@ const dailySummaryEmail = (() => {
         privateApi.getCancelledSubsTodayCount(storeId);
       dailySummary.cancelledSubsTodayRevenue =
         privateApi.getCancelledSubsTodayRevenue(storeId);
+      dailySummary.cancelledSubsToday =
+        privateApi.getCancelledSubsToday(storeId);
 
       dailySummary.failedPaymentCount =
         privateApi.getFailedPaymentCount(storeId);
@@ -166,6 +168,27 @@ const dailySummaryEmail = (() => {
     return +lostRevenue.toFixed(2);
   };
 
+  privateApi.getCancelledSubsToday = storeId => (
+    subscriptionHistoryCollection.find({
+      storeId,
+      statusId: SubscriptionStatus.cancelled.id,
+      timestamp: {
+        $gte: moment().subtract(1, 'day').startOf('day').toDate(),
+        $lt: moment().subtract(1, 'day').endOf('day').toDate(),
+      },
+    }).map((sub) => {
+      const subData =
+        SubscriptionsCollection.findOne({ _id: sub.subscriptionId });
+      return {
+        name: subData.customerName(),
+        daysSinceFirstOrder: subData.daysSinceFirstOrder(),
+        renewalCount: subData.renewalCount(),
+        // Represents the amount of the subscription when it was cancelled.
+        total: subData.subscriptionTotal(),
+      };
+    })
+  );
+
   privateApi.getFailedPaymentCount = storeId => (
     SubscriptionsCollection.find({
       storeId,
@@ -271,6 +294,23 @@ const dailySummaryEmail = (() => {
           Count: ${dailySummary.cancelledSubsTodayCount} <br />
           Lost Revenue: $${dailySummary.cancelledSubsTodayRevenue}
         </p>
+      `;
+
+      if (dailySummary.cancelledSubsToday) {
+        content += '<ul>';
+        dailySummary.cancelledSubsToday.forEach((sub) => {
+          content +=
+            '<li>' +
+            `${sub.name}, ` +
+            `${sub.daysSinceFirstOrder} days since first order, ` +
+            `${sub.renewalCount} renewals, ` +
+            `$${sub.total.toFixed(2)}` +
+            '</li>';
+        });
+        content += '</ul>';
+      }
+
+      content += `
         <p>
           <strong>Failed Payments</strong> <br />
           Count: ${dailySummary.failedPaymentCount} <br />
