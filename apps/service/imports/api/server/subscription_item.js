@@ -1,6 +1,8 @@
 import {
   SubscriptionsCollection,
   SubscriptionItemsCollection,
+  customerDiscountsCollection,
+  SubscriptionCustomersCollection,
 } from 'meteor/moreplease:common';
 
 export const createSubscriptionItem = ({
@@ -19,8 +21,22 @@ export const createSubscriptionItem = ({
     }
 
     subscriptionItems.forEach((item) => {
-      const newItem = Object.assign({ subscriptionId, storeId }, item);
-      SubscriptionItemsCollection.insert(newItem);
+      if (item.customerDiscount) {
+        // If the incoming subscription item represents a customer discount
+        // instead of an actual product, extract the discount and save it in
+        // the customer discount collection.
+        const customer =
+          SubscriptionCustomersCollection.findOne({ subscriptionId, storeId });
+        customerDiscountsCollection.createNewDiscount({
+          customerId: customer._id,
+          storeId,
+          durationMonths: 12, // Hard coding to 12 months for now
+          discountPercent: item.customerDiscount,
+        });
+      } else {
+        const newItem = Object.assign({ subscriptionId, storeId }, item);
+        SubscriptionItemsCollection.insert(newItem);
+      }
     });
 
     const subscription = SubscriptionsCollection.findOne({
@@ -42,56 +58,72 @@ export const createSubscriptionItem = ({
 export const updateSubscriptionItem = ({ storeId, itemId, itemData }) => {
   let subscriptionData;
   if (storeId && itemId && itemData) {
-    const updateData = {};
-    if (itemData.variationId) {
-      updateData.variationId = itemData.variationId;
-    }
-    if (itemData.quantity) {
-      updateData.quantity = itemData.quantity;
-    }
-    if (itemData.discountPercent) {
-      updateData.discountPercent = itemData.discountPercent;
-    }
-    if (Object.keys(updateData).length) {
-      SubscriptionItemsCollection.update({
-        _id: itemId,
-        storeId,
-      }, {
-        $set: updateData,
-      });
+    const updatedItem =
+      SubscriptionItemsCollection.findOne({ _id: itemId, storeId });
+    const subscription = SubscriptionsCollection.findOne({
+      _id: updatedItem.subscriptionId,
+      storeId,
+    });
 
-      const updatedItem =
-        SubscriptionItemsCollection.findOne({ _id: itemId, storeId });
-      const subscription = SubscriptionsCollection.findOne({
-        _id: updatedItem.subscriptionId,
+    if (itemData.customerDiscount) {
+      // If the incoming subscription item represents a customer discount
+      // instead of an actual product, extract the discount and save it in
+      // the customer discount collection.
+      const customer = SubscriptionCustomersCollection.findOne({
+        subscriptionId: subscription._id,
         storeId,
       });
-
-      // If making changes and an associated draft order exists, flag that
-      // draft order changes are required.
-      if (subscription.draftOrderId) {
-        SubscriptionsCollection.update({
-          _id: subscription._id,
-        }, {
-          $set: {
-            draftOrderChanges: true,
-          },
-        });
+      customerDiscountsCollection.createNewDiscount({
+        customerId: customer._id,
+        storeId,
+        durationMonths: 12, // Hard coding to 12 months for now
+        discountPercent: itemData.customerDiscount,
+      });
+    } else {
+      const updateData = {};
+      if (itemData.variationId) {
+        updateData.variationId = itemData.variationId;
       }
+      if (itemData.quantity) {
+        updateData.quantity = itemData.quantity;
+      }
+      if (itemData.discountPercent) {
+        updateData.discountPercent = itemData.discountPercent;
+      }
+      if (Object.keys(updateData).length) {
+        SubscriptionItemsCollection.update({
+          _id: itemId,
+          storeId,
+        }, {
+          $set: updateData,
+        });
 
-      subscriptionData = {
-        subscription: {
-          subtotal: +subscription.subscriptionSubtotal().toFixed(2),
-          shipping:
-            subscription.shippingCost ? +subscription.shippingCost.toFixed(2) : 0,
-          total: +subscription.subscriptionTotal().toFixed(2),
-        },
-        subscriptionItem: {
-          totalPrice: +updatedItem.totalPrice().toFixed(2),
-          discountedTotalPrice: +updatedItem.totalDiscountedPrice().toFixed(2),
-        },
-      };
+        // If making changes and an associated draft order exists, flag that
+        // draft order changes are required.
+        if (subscription.draftOrderId) {
+          SubscriptionsCollection.update({
+            _id: subscription._id,
+          }, {
+            $set: {
+              draftOrderChanges: true,
+            },
+          });
+        }
+      }
     }
+
+    subscriptionData = {
+      subscription: {
+        subtotal: +subscription.subscriptionSubtotal().toFixed(2),
+        shipping:
+          subscription.shippingCost ? +subscription.shippingCost.toFixed(2) : 0,
+        total: +subscription.subscriptionTotal().toFixed(2),
+      },
+      subscriptionItem: {
+        totalPrice: +updatedItem.totalPrice().toFixed(2),
+        discountedTotalPrice: +updatedItem.totalDiscountedPrice().toFixed(2),
+      },
+    };
   }
 
   return subscriptionData;

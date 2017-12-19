@@ -33,3 +33,5 @@ export { apiAccess };
 
 import transmitEvent from './webhook/transmit_event';
 export { transmitEvent };
+
+export * from './domain/customer_discount';

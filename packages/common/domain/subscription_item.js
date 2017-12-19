@@ -8,6 +8,7 @@ import { SubscriptionsCollection } from './subscription';
 import { ProductsCollection } from './product';
 import subscriptionOrderType from './subscription_order_type';
 import role from '../utilities/role';
+import { customerDiscountsCollection } from './customer_discount';
 
 // Schema
 const SubscriptionItemSchema = new SimpleSchema({
@@ -130,11 +131,38 @@ const SubscriptionItem = {
     return this.price(currency) * this.quantity;
   },
 
+  // Customers can have global discounts associated with their customer
+  // account. If a global customer discount exists (and it's active), make
+  // sure each subscription item is setup to use that global discount. If the
+  // current subscription item already has a discount applied and it's less
+  // than the global customer discount, replace the subscirption item discount
+  // with the global discount.
+  activeDiscountPercent() {
+    const subscription = this.subscription();
+    const customerDiscountPercent =
+      customerDiscountsCollection.activeDiscountPercent({
+        customerId: subscription.customerId,
+        storeId: subscription.storeId,
+      });
+
+    let activeDiscountPercent = this.discountPercent;
+    if (activeDiscountPercent &&
+      customerDiscountPercent &&
+      activeDiscountPercent < customerDiscountPercent
+    ) {
+      activeDiscountPercent = customerDiscountPercent;
+    } else if (customerDiscountPercent && !activeDiscountPercent) {
+      activeDiscountPercent = customerDiscountPercent;
+    }
+
+    return activeDiscountPercent;
+  },
+
   totalDiscountedPrice(currency) {
     let productPrice = this.price(currency);
-    if (this.discountPercent) {
-      productPrice =
-        +((productPrice * ((100 - this.discountPercent) / 100)).toFixed(2));
+    if (this.activeDiscountPercent()) {
+      const discount = this.activeDiscountPercent();
+      productPrice = +((productPrice * ((100 - discount) / 100)).toFixed(2));
     }
     return productPrice * this.quantity;
   },

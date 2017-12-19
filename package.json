@@ -33,6 +33,7 @@
       "import/newline-after-import": "off",
       "no-underscore-dangle": "off",
       "import/no-duplicates": "off",
+      "import/prefer-default-export": "off",
       "object-shorthand": [
         "error",
         "always",

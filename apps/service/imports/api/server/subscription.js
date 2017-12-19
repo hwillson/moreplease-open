@@ -12,6 +12,7 @@ import {
   subscriptionOrdersCollection,
   StoresCollection,
   transmitEvent,
+  customerDiscountsCollection,
 } from 'meteor/moreplease:common';
 import createCustomer from './customer';
 
@@ -95,6 +96,19 @@ export const createSubscription = ({ storeId, subscriptionData }) => {
       subscriptionOrdersCollection.insert(order);
     }
 
+    if (subscriptionData.customerDiscount &&
+      Object.keys(subscriptionData.customerDiscount).length
+    ) {
+      const customerDiscount = subscriptionData.customerDiscount;
+      customerDiscountsCollection.createNewDiscount({
+        customerId,
+        storeId,
+        label: customerDiscount.label,
+        durationMonths: customerDiscount.durationMonths,
+        discountPercent: customerDiscount.discountPercent,
+      });
+    }
+
     if (subscriptionData.sendSubscriptionIdToStore) {
       SubscriptionManager.sendSubscriptionDetailsToStore({
         storeId,
@@ -156,6 +170,21 @@ const prepareCustomerData = (subscription) => {
   return customerData;
 };
 
+const prepareCustomerDiscountData = (subscription) => {
+  const customerDiscount = customerDiscountsCollection.findOne({
+    customerId: subscription.customerId,
+    status: 'active',
+    storeId: subscription.storeId,
+  });
+  let customerDiscountData;
+  if (customerDiscount) {
+    customerDiscountData = {
+      customerDiscount,
+    };
+  }
+  return customerDiscountData;
+};
+
 const prepareSubscriptionItems = (subscription) => {
   let data;
   const subscriptionItems = subscription.getSubscriptionItems();
@@ -208,6 +237,7 @@ export const readSubscription = ({ storeId, subscriptionId }) => {
         prepareSubscriptionData(subscription),
         prepareCustomerData(subscription),
         prepareSubscriptionItems(subscription),
+        prepareCustomerDiscountData(subscription),
       );
     }
   }

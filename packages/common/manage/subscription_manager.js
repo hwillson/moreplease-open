@@ -86,7 +86,7 @@ const SubscriptionManager = {
               productId: subscriptionItem.productId,
               variationId: subscriptionItem.variationId,
               quantity: subscriptionItem.quantity,
-              discountPercent: subscriptionItem.discountPercent,
+              discountPercent: subscriptionItem.activeDiscountPercent(),
               productName: product.productName,
               variationName: product.variationName,
             });

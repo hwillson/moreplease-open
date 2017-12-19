@@ -18,6 +18,10 @@ import {
   updateSubscriptionItem,
   deleteSubscriptionItem as removeSubscriptionItem,
 } from './subscription_item';
+import {
+  createCustomerDiscount,
+  deleteCustomerDiscount as removeCustomerDiscount,
+} from './customer_discount';
 
 Raven.config(Meteor.settings.private.sentry.dsn, {
   environment: Meteor.isProduction ? 'production' : 'development',
@@ -110,6 +114,17 @@ const endpoints = {
     },
     DELETE(request, storeId, itemId) {
       return removeSubscriptionItem({ storeId, itemId });
+    },
+  },
+  '/customer_discounts': {
+    POST(request, storeId) {
+      const data = request.body;
+      return createCustomerDiscount({ storeId, data });
+    },
+  },
+  '/customer_discounts/:discountId': {
+    DELETE(request, storeId, discountId) {
+      return removeCustomerDiscount({ storeId, discountId });
     },
   },
 };
