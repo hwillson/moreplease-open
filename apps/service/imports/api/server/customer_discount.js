@@ -1,6 +1,7 @@
 import {
   SubscriptionsCollection,
   customerDiscountsCollection,
+  SubscriptionCustomersCollection,
 } from 'meteor/moreplease:common';
 
 import createCustomer from './customer';
@@ -47,4 +48,32 @@ export const deleteCustomerDiscount = ({ storeId, discountId }) => {
     }
   }
   return subscriptionData;
+};
+
+export const readCustomerDiscount = ({ storeId, externalCustomerId }) => {
+  let customerDiscount;
+  if (storeId && externalCustomerId) {
+    const customer = SubscriptionCustomersCollection.findOne({
+      externalId: +externalCustomerId,
+      storeId,
+    });
+    if (customer) {
+      const fullCustomerDiscount = customerDiscountsCollection.findOne({
+        customerId: customer._id,
+        storeId,
+      });
+      if (fullCustomerDiscount) {
+        customerDiscount = {
+          label: fullCustomerDiscount.label,
+          validFromDate: fullCustomerDiscount.validFromDate,
+          validToDate: fullCustomerDiscount.validToDate,
+          durationMonths: fullCustomerDiscount.durationMonths,
+          discountPercent: fullCustomerDiscount.discountPercent,
+          discountType: fullCustomerDiscount.discountType,
+          status: fullCustomerDiscount.status,
+        };
+      }
+    }
+  }
+  return customerDiscount;
 };

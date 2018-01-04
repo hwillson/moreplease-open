@@ -21,6 +21,7 @@ import {
 import {
   createCustomerDiscount,
   deleteCustomerDiscount as removeCustomerDiscount,
+  readCustomerDiscount,
 } from './customer_discount';
 
 Raven.config(Meteor.settings.private.sentry.dsn, {
@@ -125,6 +126,11 @@ const endpoints = {
   '/customer_discounts/:discountId': {
     DELETE(request, storeId, discountId) {
       return removeCustomerDiscount({ storeId, discountId });
+    },
+  },
+  '/customer_discounts/external/:externalCustomerId': {
+    GET(request, storeId, externalCustomerId) {
+      return readCustomerDiscount({ storeId, externalCustomerId });
     },
   },
 };
