@@ -22,7 +22,6 @@ const dailySummaryEmail = (() => {
       dailySummary.activeSubsMonthlyCount =
         privateApi.getActiveSubsMonthlyCount(storeId);
 
-      // TODO - this is really slow; this needs to be handled differently.
       dailySummary.activeSubsMonthlyRevenue =
         privateApi.getActiveSubsMonthlyRevenue(storeId);
 
@@ -72,15 +71,17 @@ const dailySummaryEmail = (() => {
   );
 
   privateApi.getActiveSubsMonthlyRevenue = (storeId) => {
-    let monthlyRevenue = 0;
-    SubscriptionsCollection.find({
+    const activeSubs = SubscriptionsCollection.find({
       storeId,
       statusId: SubscriptionStatus.active.id,
-    }).forEach((subscription) => {
-      if (subscription.renewalFrequencyId === 'm2') {
-        monthlyRevenue += (subscription.subscriptionTotal() / 2);
+    }).fetch();
+
+    let monthlyRevenue = 0;
+    activeSubs.forEach((sub) => {
+      if (sub.renewalFrequencyId === 'm2') {
+        monthlyRevenue += (sub.subscriptionTotal() / 2);
       } else {
-        monthlyRevenue += subscription.subscriptionTotal();
+        monthlyRevenue += sub.subscriptionTotal();
       }
     });
     return +monthlyRevenue.toFixed(2);
