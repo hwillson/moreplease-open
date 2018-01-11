@@ -1,16 +1,23 @@
 import { Meteor } from 'meteor/meteor';
 import { check } from 'meteor/check';
 
+import {
+  emailsCollection,
+  StoresCollection,
+} from 'meteor/moreplease:common';
+
 Meteor.publish('email', function email(emailType) {
   check(emailType, String);
+  let cursor;
   if (!this.userId) {
-    this.ready();
+    cursor = this.ready();
   } else {
     const accountId = Meteor.users.findOne({ _id: this.userId }).accountId;
-    const store = MorePlease.collections.stores.findOne({ accountId });
-    return MorePlease.collections.emails.find({
+    const store = StoresCollection.findOne({ accountId });
+    cursor = emailsCollection.find({
       storeId: store._id,
-      emailType
+      emailType,
     });
   }
+  return cursor;
 });

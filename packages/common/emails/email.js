@@ -81,7 +81,7 @@ export const emailMethods = {
           StoresCollection.findOne({
             accountId: Meteor.user().accountId,
           });
-        const newDoc = Object.assign(doc, { storeId: store.id });
+        const newDoc = Object.assign(doc, { storeId: store._id });
         emailsCollection.insert(newDoc);
       }
     },
@@ -89,12 +89,12 @@ export const emailMethods = {
 
   update: new ValidatedMethod({
     name: 'MorePlease.methods.email.update',
-    validate(args) {
-      emailSchema.validate(args.modifier, { modifier: true });
+    validate({ modifier }) {
+      emailSchema.validate(modifier, { modifier: true });
     },
-    run(args) {
+    run({ _id, modifier }) {
       if (this.userId) {
-        emailsCollection.update(args._id, args.modifier);
+        emailsCollection.update(_id, modifier);
       }
     },
   }),

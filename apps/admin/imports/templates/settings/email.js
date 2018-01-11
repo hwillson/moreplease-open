@@ -62,7 +62,7 @@ Template.adminSettingsEmail.helpers({
   },
 
   singleMethodArgument() {
-    return getEmail(this.emailType);
+    return true;
   },
 
   emailType() {
@@ -109,7 +109,9 @@ Template.adminSettingsEmail.events({
 
   'click .js-test-email'(event, templateInstance) {
     const email = getEmail(templateInstance.data.emailType);
-    templateInstance.data.selectedEmailVar.set(email._id);
+    if (email) {
+      templateInstance.data.selectedEmailVar.set(email._id);
+    }
   },
 });
 
