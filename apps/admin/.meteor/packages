@@ -26,7 +26,6 @@ accounts-password@1.4.0
 kadira:blaze-layout
 kadira:flow-router
 session@1.1.7
-kevohagan:sweetalert@1.0.0
 juliancwirko:s-alert@3.1.4
 mfactory:admin-lte
 arillo:flow-router-helpers

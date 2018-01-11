@@ -60,6 +60,6 @@ Template.adminSubscriptions.helpers({
 
 Template.adminSubscriptions.events({
   'click tbody tr'() {
-    FlowRouter.go(`/admin/subscription?id=${this._id}`);
+    FlowRouter.go(`/subscription?id=${this._id}`);
   },
 });

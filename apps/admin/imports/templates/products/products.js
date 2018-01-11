@@ -2,8 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { Spacebars } from 'meteor/spacebars';
 import { $ } from 'meteor/jquery';
-import { sweetAlert, swal } from 'meteor/kevohagan:sweetalert';
-import { _ } from 'meteor/underscore';
+import swal from 'sweetalert';
 
 import { StoresCollection } from 'meteor/moreplease:common';
 
@@ -138,27 +137,36 @@ Template.adminProducts.helpers({
 Template.adminProducts.events({
   'click .reactive-table tbody tr'(event) {
     if ($(event.target).hasClass('remove-from-sub')) {
-      sweetAlert({
+      swal({
         title: 'Remove From Subscriptions?',
         text: 'Are you sure you want to remove this product from all subscriptions?',
-        type: 'warning',
-        showCancelButton: true,
-        cancelButtonText: 'Cancel',
-        confirmButtonText: 'Remove',
-        closeOnConfirm: false,
-        confirmButtonColor: '#dd4b39',
-        animation: false,
-      }, _.bind(() => {
-        $('.confirm').html('Removing...');
-        Meteor.call(
-          'removeProductFromSubscriptions',
-          this.productId,
-          this.variationId,
-          () => {
-            swal('Product has been removed from all subscriptions.');
+        icon: 'warning',
+        buttons: {
+          cancel: {
+            text: 'Cancel',
+            visible: true,
+            value: false,
           },
-        );
-      }, this));
+          confirm: {
+            text: 'Remove',
+            closeModal: false,
+            value: true,
+          },
+        },
+        dangerMode: true,
+      }).then((confirmed) => {
+        if (confirmed) {
+          $('.confirm').html('Removing...');
+          Meteor.call(
+            'removeProductFromSubscriptions',
+            this.productId,
+            this.variationId,
+            () => {
+              swal('Product has been removed from all subscriptions.');
+            },
+          );
+        }
+      });
     }
   },
 });

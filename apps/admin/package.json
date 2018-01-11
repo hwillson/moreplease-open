@@ -8,6 +8,7 @@
     "babel-runtime": "^6.20.0",
     "bcrypt": "^1.0.3",
     "mailgun-js": "^0.7.7",
-    "meteor-node-stubs": "~0.2.4"
+    "meteor-node-stubs": "~0.2.4",
+    "sweetalert": "^2.1.0"
   }
 }

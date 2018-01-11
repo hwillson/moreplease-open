@@ -5,7 +5,7 @@ import { _ } from 'meteor/underscore';
 import { $ } from 'meteor/jquery';
 import { moment } from 'meteor/momentjs:moment';
 import { FlowRouter } from 'meteor/kadira:flow-router';
-import { sweetAlert, swal } from 'meteor/kevohagan:sweetalert';
+import swal from 'sweetalert';
 
 import {
   StoresCollection,
@@ -145,7 +145,7 @@ Template.adminSubscription.events({
 
   'click .goto-subscriptions'(event) {
     event.preventDefault();
-    FlowRouter.go('/admin/subscriptions');
+    FlowRouter.go('/subscriptions');
   },
 
   'click .subscription-pause'(event) {
@@ -186,29 +186,38 @@ Template.adminSubscription.events({
 
   'click .subscription-renew-now'(event) {
     event.preventDefault();
-    sweetAlert({
+    swal({
       title: 'Renew Subscription Immediately?',
       text: 'This will immediately create a new renewal order (and bill the customer). Are you sure?',
-      type: 'warning',
-      showCancelButton: true,
-      cancelButtonText: 'Cancel',
-      confirmButtonText: 'Renew Now',
-      closeOnConfirm: false,
-      confirmButtonColor: '#D0D0D0',
-      animation: false,
-    }, () => {
-      $('.confirm').html('Renewing...');
-      Meteor.call(
-        'createSubscriptionRenewal',
-        this._id,
-        (error, renewedSuccessfuly) => {
-          if (renewedSuccessfuly) {
-            swal('Renewal order has been created.');
-          } else {
-            swal('Renewal order has not been created.');
-          }
+      icon: 'warning',
+      buttons: {
+        cancel: {
+          text: 'Cancel',
+          visible: true,
+          value: false,
         },
-      );
+        confirm: {
+          text: 'Renew Now',
+          closeModal: true,
+          value: true,
+        },
+      },
+      dangerMode: true,
+    }).then((confirmed) => {
+      if (confirmed) {
+        $('.confirm').html('Renewing...');
+        Meteor.call(
+          'createSubscriptionRenewal',
+          this._id,
+          (error, renewedSuccessfuly) => {
+            if (renewedSuccessfuly) {
+              swal('Renewal order has been created.');
+            } else {
+              swal('Renewal order has not been created.');
+            }
+          },
+        );
+      }
     });
   },
 });

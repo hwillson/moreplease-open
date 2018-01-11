@@ -13,32 +13,30 @@ import '../../templates/settings/emails';
 import '../../templates/settings/store';
 import '../../templates/settings/api';
 
-FlowRouter.route('/');
-
 const ensureLoggedIn = (context, redirect) => {
   if (!Meteor.userId()) {
-    redirect('/admin/welcome');
+    redirect('/welcome');
   }
 };
 
-FlowRouter.route('/admin', {
+FlowRouter.route('/', {
   action: () => {
-    FlowRouter.go('/admin/welcome');
+    FlowRouter.go('/welcome');
   },
 });
 
-FlowRouter.route('/admin/welcome', {
+FlowRouter.route('/welcome', {
   name: 'adminWelcome',
   action: () => {
     if (Meteor.userId()) {
-      FlowRouter.go('/admin/dashboard');
+      FlowRouter.go('/dashboard');
     } else {
       BlazeLayout.render('adminLayout', { main: 'adminWelcome' });
     }
   },
 });
 
-FlowRouter.route('/admin/dashboard', {
+FlowRouter.route('/dashboard', {
   name: 'adminDashboard',
   triggersEnter: [ensureLoggedIn],
   action: () => {
@@ -46,7 +44,7 @@ FlowRouter.route('/admin/dashboard', {
   },
 });
 
-FlowRouter.route('/admin/subscriptions', {
+FlowRouter.route('/subscriptions', {
   name: 'adminSubscriptions',
   triggersEnter: [ensureLoggedIn],
   action: () => {
@@ -54,7 +52,7 @@ FlowRouter.route('/admin/subscriptions', {
   },
 });
 
-FlowRouter.route('/admin/subscription', {
+FlowRouter.route('/subscription', {
   name: 'adminSubscription',
   triggersEnter: [ensureLoggedIn],
   action: (params, queryParams) => {
@@ -63,7 +61,7 @@ FlowRouter.route('/admin/subscription', {
   },
 });
 
-FlowRouter.route('/admin/products', {
+FlowRouter.route('/products', {
   name: 'adminProducts',
   triggersEnter: [ensureLoggedIn],
   action: () => {
@@ -71,7 +69,7 @@ FlowRouter.route('/admin/products', {
   },
 });
 
-FlowRouter.route('/admin/settings/email', {
+FlowRouter.route('/settings/email', {
   name: 'adminSettingsEmails',
   triggersEnter: [ensureLoggedIn],
   action: () => {
@@ -79,7 +77,7 @@ FlowRouter.route('/admin/settings/email', {
   },
 });
 
-FlowRouter.route('/admin/settings/store', {
+FlowRouter.route('/settings/store', {
   name: 'adminSettingsStore',
   triggersEnter: [ensureLoggedIn],
   action: () => {
@@ -87,7 +85,7 @@ FlowRouter.route('/admin/settings/store', {
   },
 });
 
-FlowRouter.route('/admin/settings/api', {
+FlowRouter.route('/settings/api', {
   name: 'adminSettingsApi',
   triggersEnter: [ensureLoggedIn],
   action: () => {
