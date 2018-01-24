@@ -27,6 +27,10 @@ import dailySummaryEmail
   from './reporting/daily_summary_email';
 export { dailySummaryEmail };
 
+import adminDailySummaryEmail
+  from './reporting/admin_daily_summary_email';
+export { adminDailySummaryEmail };
+
 import apiAccess
   from './api_access/api_access';
 export { apiAccess };
