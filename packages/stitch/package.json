@@ -1,0 +1,7 @@
+{
+  "name": "moreplease-stitch",
+  "version": "0.0.1",
+  "scripts": {
+    "test": "meteor test-packages --port 3100 --driver-package practicalmeteor:mocha ./"
+  }
+}

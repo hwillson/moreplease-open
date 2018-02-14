@@ -1,0 +1,17 @@
+{
+  "private": {
+    "email": {
+      "mailgun": {
+        "apiKey": "",
+        "domain": ""
+      }
+    },
+    "sentry": {
+      "dsn": ""
+    },
+    "stitch": {
+      "accessToken": "",
+      "contactId": ""
+    }
+  }
+}
