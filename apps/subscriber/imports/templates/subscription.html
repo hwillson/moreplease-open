@@ -1,0 +1,289 @@
+<body>
+  <div class="widget subscription container-fluid">
+    <h1>Subscription</h1>
+    {{#if subscriptionsInitialized}}
+
+      {{#if subscription}}
+
+        {{#with subscription}}
+
+          <div class="alert alert-info">
+            <i class="fa fa-exclamation-circle"></i>
+            <strong>Please Note:</strong>
+            Changes made to your subscription below are <strong>saved automatically</strong>. You do not need to confirm or save your changes.
+          </div>
+
+          <div class="subscription-details row">
+            <div class="col-md-7">
+              <form>
+                <table class="table">
+                  <tbody>
+                    <tr>
+                      <th class="sub-th-sub-status">Subscription Status</th>
+                      <td>
+                        <span class="sub-status sub-{{statusId}}">
+                          {{subscriptionStatusLabel}}
+                        </span>
+                        <span class="sub-controls">
+                          (<a href="#" class="sub-pause">Pause</a><a href="#"
+                            class="u-hide sub-resume">Resume</a>
+                          | <a href="#" class="sub-cancel">Cancel</a>)
+                        </span>
+                        {{#if paymentFailed}}
+                          <div class="subscription-failed alert alert-danger">
+                            <i class="fa fa-exclamation-triangle"></i>
+                            This subscription has been paused due to payment failure. Please verify your credit card details, adjust your renewal date and resume your subscription when ready. Your card will be charged on the renewal date.
+                          </div>
+                        {{/if}}
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>Subscription Total</th>
+                      <td class="sub-total">
+                        <strong>
+                          {{formatPrice subscriptionTotal currency}}
+                        </strong>
+                        {{#if shippingCost}}
+                          <span class="sub-shipping">
+                            ({{formatPrice subscriptionSubtotal currency}}
+                            + {{formatPrice shippingCost currency}} shipping)
+                          </span>
+                        {{/if}}
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>Ship My Subscription</th>
+                      <td>
+                        <select class="form-control sub-renewal-freq">
+                          {{#each availableRenewalFrequencies}}
+                            <option value="{{this}}">
+                              {{frequencyLabel this}}
+                            </option>
+                          {{/each}}
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th class="sub-th-next-ship-date">
+                        My Next Order Ships On
+                      </th>
+                      <td>
+                        <div class="input-group col-md-6">
+                          <input type="text"
+                            class="form-control sub-renewal-date"
+                            value="{{formatDate renewalDate store.dateFormat}}">
+                          <span class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                          </span>
+                        </div>
+                        <p class="sub-ship-message">
+                          Your "Ship My Subscription" frequency starts from this date.
+                        </p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </form>
+            </div>
+          </div>
+        {{/with}}
+
+        {{#if subscriptionItemsExist}}
+
+          <h2>Subscription Contents</h2>
+          <div class="row">
+            <div class="col-md-8">
+
+              <table class="hidden-xs">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th></th>
+                    <th>Item</th>
+                    <th class="sub-item-quantity">Quantity</th>
+                    <th class="sub-item-price">Total Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {{#each subscriptionItems}}
+                    {{#if productVariation}}
+                      <tr>
+                        <td>
+                          <a href="#" class="remove-sub-item">
+                            <i class="fa fa-remove"></i>
+                          </a>
+                        </td>
+                        <td class="sub-item-image">
+                          {{#if productVariation.productImage}}
+                            <img src="{{imageUrl productVariation.productImage}}">
+                          {{/if}}
+                        </td>
+                        <td>
+                          <p>
+                            <a href="{{store.url}}{{productVariation.productUrl}}" target="_top">{{productVariation.productName}}</a>
+                          </p>
+                          {{#if variationId}}
+                            {{#if locked}}
+                              {{{variationName}}}
+                            {{else}}
+                              <select class="form-control sub-item-variations">
+                                {{#each variations}}
+                                  <option value="{{variationId}}"
+                                      {{selectedIfEquals ../variationId}}>
+                                    {{{variationName}}}
+                                  </option>
+                                {{/each}}
+                              </select>
+                            {{/if}}
+                          {{/if}}
+
+                          {{#if note}}
+                            <p>{{note}}</p>
+                          {{/if}}
+                        </td>
+                        <td class="sub-item-quantity">
+                          {{#if locked}}
+                            {{quantity}}
+                          {{else}}
+                            <div class="input-group spinner">
+                              <input type="text" class="form-control quantity"
+                                value="{{quantity}}">
+                              <div class="input-group-btn-vertical">
+                                <button class="btn btn-default quantity-up"
+                                    type="button">
+                                  <i class="fa fa-caret-up"></i>
+                                </button>
+                                <button class="btn btn-default quantity-down"
+                                    type="button">
+                                  <i class="fa fa-caret-down"></i>
+                                </button>
+                              </div>
+                            </div>
+                          {{/if}}
+                        </td>
+                        <td class="sub-item-price">
+                          {{#if subscriptionItemDiscountedPrice this}}
+                            <strike>
+                              {{subscriptionItemPrice this}}
+                            </strike>&nbsp;
+                            {{subscriptionItemDiscountedPrice this}}
+                          {{else}}
+                            {{subscriptionItemPrice this}}
+                          {{/if}}
+                        </td>
+                      </tr>
+                    {{/if}}
+                  {{/each}}
+                </tbody>
+              </table>
+
+              <div class="visible-xs-block">
+                {{#each subscriptionItems}}
+                  {{#if productVariation}}
+                    <div class="sub-item">
+                      <div class="row">
+                        <div class="col-xs-1">
+                          <a href="#" class="remove-sub-item">
+                            <i class="fa fa-remove"></i>
+                          </a>
+                        </div>
+                        <div class="col-xs-5 text-center">
+                          {{#if productVariation.productImage}}
+                            <img src="{{imageUrl productVariation.productImage}}">
+                          {{/if}}
+                        </div>
+                        <div class="col-xs-2">
+                          <strike>
+                            {{subscriptionItemPrice this}}
+                          </strike>&nbsp;
+                          {{subscriptionItemDiscountedPrice this}}
+                        </div>
+                        <div class="col-xs-3">
+                          {{#if locked}}
+                            {{quantity}}
+                          {{else}}
+                            <div class="input-group spinner">
+                              <input type="text" class="form-control quantity"
+                                value="{{quantity}}">
+                              <div class="input-group-btn-vertical">
+                                <button class="btn btn-default quantity-up"
+                                    type="button">
+                                  <i class="fa fa-caret-up"></i>
+                                </button>
+                                <button class="btn btn-default quantity-down"
+                                    type="button">
+                                  <i class="fa fa-caret-down"></i>
+                                </button>
+                              </div>
+                            </div>
+                          {{/if}}
+                        </div>
+                      </div>
+                      <div>
+                        <p>
+                          <a href="{{store.url}}{{productVariation.productUrl}}" target="_top">{{productVariation.productName}}</a>
+                        </p>
+                        {{#if variationId}}
+                          {{#if locked}}
+                            {{{variationName}}}
+                          {{else}}
+                            <select class="form-control sub-item-variations">
+                              {{#each variations}}
+                                <option value="{{variationId}}"
+                                    {{selectedIfEquals ../variationId}}>
+                                  {{{variationName}}}
+                                </option>
+                              {{/each}}
+                            </select>
+                          {{/if}}
+                        {{/if}}
+
+                        {{#if note}}
+                          <p>{{note}}</p>
+                        {{/if}}
+                      </div>
+                    </div>
+                  {{/if}}
+                {{/each}}
+              </div>
+
+            </div>
+            <div class="col-md-4">
+              <div class="sub-message">
+                {{#if isPaused}}
+                  Your subscription is currently <strong>PAUSED</strong>. All shipments have been put on-hold and you are not being billed. Resume your subscription to continue receiving your selected products.
+                {{else}}
+                  Your next subscription order will be packaged, billed and prepared for shipping on <strong>{{formatLongDate subscriptionRenewalDate}}</strong>, at which point you will be billed <strong>{{formatPrice subscription.subscriptionTotal subscriptionCurrency}}</strong>. To make changes to your box&#42;:
+                  <ul>
+                    <li>Adjust subscription item flavors and quantities;</li>
+                    <li>Remove items from your subscription;</li>
+                    <li>Browse the site and add new items to your subscription by clicking on an items "Add to Subscription" button.</li>
+                  </ul>
+                  <p><em>&#42; Changes to box should be made by midnight the previous day.</em></p>
+                {{/if}}
+              </div>
+            </div>
+          </div>
+
+        {{else}}
+          <p>Nothing in your subscription. Products can be added from our product catalog or product pages.</p>
+        {{/if}}
+
+      {{else}}
+        <p>
+          <strong>You do not have a subscription.</strong>
+        </p>
+        <div class="alert alert-info">
+          <ul>
+            <li>If you recently cancelled your subscription, thanks for your business! When you're ready to get started again, give us a shout and we'll show you all the new stuff we want you to try out!</li>
+            <li>To get started with a new subscription simply browse our site, add items to the cart, and mark the cart as a subscription purchase when checking out.</li>
+          </ul>
+        </div>
+      {{/if}}
+
+    {{else}}
+      Loading ...
+    {{/if}}
+
+  </div>
+</body>
