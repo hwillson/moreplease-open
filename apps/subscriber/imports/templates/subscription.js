@@ -25,14 +25,14 @@ import {
 import './subscription.html';
 
 const urlParams = new URLSearchParams(window.location.search);
-const API_KEY = urlParams.get('apiKey');
+const API_KEY = urlParams.get('token');
 if (!API_KEY) {
-  throw new Error('Missing apiKey.');
+  throw new Error('Missing access token.');
 }
 
-const SUB_ID = urlParams.get('subscriptionId');
+const SUB_ID = urlParams.get('id');
 if (!SUB_ID) {
-  throw new Error('Missing subscriptionId.');
+  throw new Error('Missing subscription ID.');
 }
 
 const initSubscriptions = (template) => {
