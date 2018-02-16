@@ -23,6 +23,12 @@ import {
   deleteCustomerDiscount as removeCustomerDiscount,
   readCustomerDiscount,
 } from './customer_discount';
+import {
+  addToSubscription,
+  subscriptionRenewalDateAndStatus,
+  subscriptionRenewalDayCount,
+  createNewSubscription,
+} from './legacy';
 
 Raven.config(Meteor.settings.private.sentry.dsn, {
   environment: Meteor.isProduction ? 'production' : 'development',
@@ -42,7 +48,7 @@ const haveAccess = (request, successCallback, errorCallback) => {
   const authHeader = request.headers.authorization;
   const storeId = getStoreId(authHeader);
   let result;
-  if (storeId) {
+  if (storeId || request.url.startsWith('/methods/api_')) {
     result = successCallback(storeId);
   } else {
     result = errorCallback();
@@ -131,6 +137,28 @@ const endpoints = {
   '/customer_discounts/external/:externalCustomerId': {
     GET(request, storeId, externalCustomerId) {
       return readCustomerDiscount({ storeId, externalCustomerId });
+    },
+  },
+
+  // Legacy
+  '/methods/api_AddToSubscription': {
+    POST(request) {
+      return addToSubscription(request.body);
+    },
+  },
+  '/methods/api_SubscriptionRenewalDateAndStatus': {
+    POST(request) {
+      return subscriptionRenewalDateAndStatus(request.body);
+    },
+  },
+  '/methods/api_SubscriptionRenewalDayCount': {
+    POST(request) {
+      return subscriptionRenewalDayCount(request.body);
+    },
+  },
+  '/methods/api_CreateNewSubscription': {
+    POST(request) {
+      return createNewSubscription(request.body);
     },
   },
 };
