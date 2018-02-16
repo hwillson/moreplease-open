@@ -166,6 +166,7 @@ const endpoints = {
 
 const app = WebApp.connectHandlers;
 
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.use((req, res, next) => {
