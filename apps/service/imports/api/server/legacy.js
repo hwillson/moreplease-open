@@ -39,7 +39,7 @@ export function subscriptionRenewalDayCount(data) {
   return renewalDays;
 }
 
-export function createNewSubscription(data) {
-  const storeId = apiAccess.findStoreIdForApiKey(data.apiKey);
-  return createSubscription({ storeId, data });
+export function createNewSubscription(subscriptionData) {
+  const storeId = apiAccess.findStoreIdForApiKey(subscriptionData.apiKey);
+  return createSubscription({ storeId, subscriptionData });
 }
