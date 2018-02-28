@@ -183,32 +183,39 @@ app.use((req, res, next) => {
     if (tokens) {
       serviceRouteMatch = true;
       const id = tokens[1];
-      const handler = endpoints[endpointPath][req.method];
       let responseStatusCode = 200;
       let responseData;
-      haveAccess(
-        req,
-        (storeId) => {
-          try {
-            responseData = handler(req, storeId, id);
-          } catch (error) {
-            Raven.setContext({
-              tags: {
-                service_path: endpointPath,
-                service_id: id,
-                service_store_id: storeId,
-              },
-            });
-            Raven.captureException(error);
-          }
-        },
-        () => {
-          responseStatusCode = 401;
-          responseData = {
-            msg: 'Unauthorized',
-          };
-        },
-      );
+      const handler = endpoints[endpointPath][req.method];
+      if (handler) {
+        haveAccess(
+          req,
+          (storeId) => {
+            try {
+              responseData = handler(req, storeId, id);
+            } catch (error) {
+              Raven.setContext({
+                tags: {
+                  service_path: endpointPath,
+                  service_id: id,
+                  service_store_id: storeId,
+                },
+              });
+              Raven.captureException(error);
+            }
+          },
+          () => {
+            responseStatusCode = 401;
+            responseData = {
+              msg: 'Unauthorized',
+            };
+          },
+        );
+      } else {
+        responseStatusCode = 400;
+        responseData = {
+          msg: 'Invalid web service endpoint',
+        };
+      }
       setHeaders(req, response);
       response.statusCode = responseStatusCode;
       response.end(JSON.stringify(responseData));
