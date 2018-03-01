@@ -109,6 +109,7 @@ const SubscriptionSchema = new SimpleSchema({
 });
 
 let SubscriptionsCollection;
+const SubscriptionMethods = {};
 
 // Model
 const Subscription = {
@@ -254,8 +255,11 @@ const Subscription = {
     });
   },
 
-  cancelSubscription() {
-    Meteor.call('cancelSubscription', this._id);
+  cancelSubscription(apiKey) {
+    SubscriptionMethods.cancelSubscription.call({
+      subscriptionId: this._id,
+      apiKey,
+    });
   },
 
   subscriptionSubtotal() {
@@ -388,18 +392,99 @@ SubscriptionsCollection.attachSchema(SubscriptionSchema);
 export { SubscriptionsCollection };
 
 // Methods
-Meteor.methods({
-  cancelSubscription(subscriptionId) {
+
+SubscriptionMethods.getStatusCounts = new ValidatedMethod({
+  name: 'subscription.getStatusCounts',
+  validate: null,
+  run() {
+    const statusCounts = [];
+    if (!this.isSimulation) {
+      if (this.userId) {
+        const user = Meteor.users.findOne({ _id: this.userId });
+        const store = StoresCollection.findOne({ accountId: user.accountId });
+        const statusIds = SubscriptionStatus.getStatusIds();
+        statusIds.forEach((statusId) => {
+          const statusCount = SubscriptionsCollection.find({
+            storeId: store._id,
+            statusId,
+          }, {
+            fields: {
+              statusId: 1,
+            },
+          }).count();
+          statusCounts.push({
+            name: SubscriptionStatus.getLabel(statusId),
+            y: statusCount,
+          });
+        });
+      }
+    }
+    return statusCounts;
+  },
+});
+
+SubscriptionMethods.getRenewalCounts = new ValidatedMethod({
+  name: 'subscription.getRenewalCounts',
+  validate: null,
+  run() {
+    const renewalCounts = {
+      yesterday: 0,
+      today: 0,
+      tomorrow: 0,
+    };
+    if (!this.isSimulation) {
+      if (this.userId) {
+        const user = Meteor.users.findOne({ _id: this.userId });
+        const store = StoresCollection.findOne({ accountId: user.accountId });
+
+        renewalCounts.yesterday =
+          subscriptionOrdersCollection.find({
+            storeId: store._id,
+            orderDate: {
+              $gte: moment().subtract(1, 'days').startOf('day').toDate(),
+              $lte: moment().subtract(1, 'days').endOf('day').toDate(),
+            },
+          }).count();
+
+        renewalCounts.today =
+          subscriptionOrdersCollection.find({
+            storeId: store._id,
+            orderDate: {
+              $gte: moment().startOf('day').toDate(),
+              $lte: moment().endOf('day').toDate(),
+            },
+          }).count();
+
+        renewalCounts.tomorrow =
+          SubscriptionsCollection.find({
+            storeId: store._id,
+            renewalDate: {
+              $gte: moment().add(1, 'days').startOf('day').toDate(),
+              $lte: moment().add(1, 'days').endOf('day').toDate(),
+            },
+            statusId: SubscriptionStatus.active.id,
+          }).count();
+      }
+    }
+    return renewalCounts;
+  },
+});
+
+SubscriptionMethods.cancelSubscription = new ValidatedMethod({
+  name: 'subscription.cancelSubscription',
+  validate: new SimpleSchema({
+    subscriptionId: { type: String },
+    apiKey: { type: String, optional: true },
+  }).validator(),
+  run({ subscriptionId, apiKey }) {
     check(subscriptionId, String);
     let subscriptionCancelled = false;
-    if (Session.get('apiKey')) {
-      // Handle cancellations coming from client side first.
-      if (this.isSimulation) {
-        subscriptionCancelled = true;
-      } else {
-        const storeId = apiAccess.findStoreIdForApiKey(
-          Session.get('apiKey'),
-        );
+    if (this.isSimulation) {
+      subscriptionCancelled = true;
+    } else {
+      if (!this.userId) {
+        // Not logged in, so cancellation is coming from customer frontend.
+        const storeId = apiAccess.findStoreIdForApiKey(apiKey);
         const subscription = SubscriptionsCollection.findOne({
           _id: subscriptionId,
           storeId,
@@ -409,12 +494,8 @@ Meteor.methods({
           subscriptionCancelled =
             subscriptionManager.cancelSubscription(subscriptionId);
         }
-      }
-    } else if (this.userId) {
-      // Handle cancellations coming from admin.
-      if (this.isSimulation) {
-        subscriptionCancelled = true;
       } else {
+        // Logged in, so cancellation is coming from the admin.
         const subscription = SubscriptionsCollection.findOne({
           _id: subscriptionId,
         });
@@ -431,8 +512,14 @@ Meteor.methods({
     }
     return subscriptionCancelled;
   },
+});
 
-  createSubscriptionRenewal(subscriptionId) {
+SubscriptionMethods.createSubscriptionRenewal = new ValidatedMethod({
+  name: 'subscription.createSubscriptionRenewal',
+  validate: new SimpleSchema({
+    subscriptionId: { type: String },
+  }).validator(),
+  run({ subscriptionId }) {
     check(subscriptionId, String);
     let renewed;
     if (!this.isSimulation && this.userId) {
@@ -444,84 +531,5 @@ Meteor.methods({
     return renewed;
   },
 });
-
-const SubscriptionMethods = {
-  getStatusCounts: new ValidatedMethod({
-    name: 'subscription.getStatusCounts',
-    validate: null,
-    run() {
-      const statusCounts = [];
-      if (!this.isSimulation) {
-        if (this.userId) {
-          const user = Meteor.users.findOne({ _id: this.userId });
-          const store = StoresCollection.findOne({ accountId: user.accountId });
-          const statusIds = SubscriptionStatus.getStatusIds();
-          statusIds.forEach((statusId) => {
-            const statusCount = SubscriptionsCollection.find({
-              storeId: store._id,
-              statusId,
-            }, {
-              fields: {
-                statusId: 1,
-              },
-            }).count();
-            statusCounts.push({
-              name: SubscriptionStatus.getLabel(statusId),
-              y: statusCount,
-            });
-          });
-        }
-      }
-      return statusCounts;
-    },
-  }),
-
-  getRenewalCounts: new ValidatedMethod({
-    name: 'subscription.getRenewalCounts',
-    validate: null,
-    run() {
-      const renewalCounts = {
-        yesterday: 0,
-        today: 0,
-        tomorrow: 0,
-      };
-      if (!this.isSimulation) {
-        if (this.userId) {
-          const user = Meteor.users.findOne({ _id: this.userId });
-          const store = StoresCollection.findOne({ accountId: user.accountId });
-
-          renewalCounts.yesterday =
-            subscriptionOrdersCollection.find({
-              storeId: store._id,
-              orderDate: {
-                $gte: moment().subtract(1, 'days').startOf('day').toDate(),
-                $lte: moment().subtract(1, 'days').endOf('day').toDate(),
-              },
-            }).count();
-
-          renewalCounts.today =
-            subscriptionOrdersCollection.find({
-              storeId: store._id,
-              orderDate: {
-                $gte: moment().startOf('day').toDate(),
-                $lte: moment().endOf('day').toDate(),
-              },
-            }).count();
-
-          renewalCounts.tomorrow =
-            SubscriptionsCollection.find({
-              storeId: store._id,
-              renewalDate: {
-                $gte: moment().add(1, 'days').startOf('day').toDate(),
-                $lte: moment().add(1, 'days').endOf('day').toDate(),
-              },
-              statusId: SubscriptionStatus.active.id,
-            }).count();
-        }
-      }
-      return renewalCounts;
-    },
-  }),
-};
 
 export { SubscriptionMethods };

@@ -25,7 +25,7 @@ momentjs:moment
 accounts-password@1.5.0
 kadira:blaze-layout
 kadira:flow-router
-session@1.1.7
+session
 juliancwirko:s-alert@3.1.4
 mfactory:admin-lte
 arillo:flow-router-helpers

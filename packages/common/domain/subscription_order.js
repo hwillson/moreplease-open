@@ -84,7 +84,7 @@ subscriptionOrdersCollection =
 subscriptionOrdersCollection.attachSchema(subscriptionOrderSchema);
 
 subscriptionOrdersCollection.after.insert((userId, doc) => {
-  const orderId = this._id || doc._id.ops[0]._id;
+  const orderId = this._id || doc.orderId || doc._id.ops[0]._id;
   if (orderId) {
     subscriptionOrderHistoryCollection.insert({
       storeId: doc.storeId,

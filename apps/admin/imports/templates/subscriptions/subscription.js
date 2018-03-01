@@ -14,6 +14,7 @@ import {
   SubscriptionItemsCollection,
   price,
   date,
+  SubscriptionMethods,
 } from 'meteor/moreplease:common';
 import './subscription_orders';
 
@@ -206,9 +207,8 @@ Template.adminSubscription.events({
     }).then((confirmed) => {
       if (confirmed) {
         $('.confirm').html('Renewing...');
-        Meteor.call(
-          'createSubscriptionRenewal',
-          this._id,
+        SubscriptionMethods.createSubscriptionRenewal.call(
+          { subscriptionId: this._id },
           (error, renewedSuccessfuly) => {
             if (renewedSuccessfuly) {
               swal('Renewal order has been created.');

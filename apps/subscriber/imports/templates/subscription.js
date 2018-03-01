@@ -326,7 +326,7 @@ Template.body.events({
       className: 'mp-widget',
     }).then((confirmed) => {
       if (confirmed) {
-        this.cancelSubscription();
+        this.cancelSubscription(API_KEY);
       }
     });
   },
