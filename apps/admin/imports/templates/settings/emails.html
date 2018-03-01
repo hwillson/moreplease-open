@@ -30,7 +30,7 @@
           {{#if Template.subscriptionsReady}}
             {{#autoForm id="email-test-form" type="method"
                 schema=testEmailSchema
-                meteormethod="MorePlease.methods.testEmail.send"
+                meteormethod=sendMethod
                 singleMethodArgument=true}}
               <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>

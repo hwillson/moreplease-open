@@ -50,9 +50,7 @@ import emailType
   from './emails/email_type';
 export { emailType };
 
-import { emailTestSchema }
-  from './emails/email_test';
-export { emailTestSchema };
+export * from './emails/email_test';
 
 import { apiKeysCollection }
   from './api_access/api_key';
