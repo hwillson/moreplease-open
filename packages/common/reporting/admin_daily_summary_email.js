@@ -1,7 +1,7 @@
-/* global MorePlease */
-
 import { SubscriptionsCollection } from '../domain/subscription';
 import { moment } from 'meteor/momentjs:moment';
+
+import email from '../utilities/email';
 
 const adminDailySummaryEmail = (() => {
   const publicApi = {};
@@ -52,7 +52,7 @@ const adminDailySummaryEmail = (() => {
         content += 'None';
       }
 
-      MorePlease.utilities.email.sendEmail(
+      email.sendEmail(
         emailTo,
         'do-not-reply@moreplease.io',
         'MorePlease Reporting: Admin Daily Summary '
