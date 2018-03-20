@@ -1,3 +1,4 @@
+import { Meteor } from 'meteor/meteor';
 import { ProductsCollection } from 'meteor/moreplease:common';
 
 const productIndexes = [
@@ -6,6 +7,8 @@ const productIndexes = [
   { storeId: 1 },
 ];
 
-productIndexes.forEach((index) => {
-  ProductsCollection.rawCollection().createIndex(index);
+Meteor.startup(() => {
+  productIndexes.forEach((index) => {
+    ProductsCollection.rawCollection().createIndex(index);
+  });
 });
