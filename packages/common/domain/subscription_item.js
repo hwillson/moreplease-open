@@ -160,11 +160,34 @@ const SubscriptionItem = {
 
   totalDiscountedPrice(currency) {
     let productPrice = this.price(currency);
-    if (this.activeDiscountPercent()) {
-      const discount = this.activeDiscountPercent();
+    const discount = this.activeDiscountPercent();
+    if (discount) {
       productPrice = +((productPrice * ((100 - discount) / 100)).toFixed(2));
     }
     return productPrice * this.quantity;
+  },
+
+  allPrices() {
+    const prices = {
+      individualPrice: 0,
+      totalPrice: 0,
+      totalDiscountedPrice: 0,
+    };
+
+    const productVariation = this.productVariation();
+    if (productVariation) {
+      prices.individualPrice = productVariation.variationPrice;
+      prices.totalPrice = prices.individualPrice * this.quantity;
+      const discount = this.activeDiscountPercent();
+      if (discount) {
+        let individualPrice = prices.individualPrice;
+        individualPrice =
+          +((individualPrice * ((100 - discount) / 100)).toFixed(2));
+        prices.totalDiscountedPrice = individualPrice * this.quantity;
+      }
+    }
+
+    return prices;
   },
 
   setQuantity(quantity) {

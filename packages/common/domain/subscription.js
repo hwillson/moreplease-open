@@ -281,6 +281,29 @@ const Subscription = {
     return subscriptionTotal;
   },
 
+  subscriptionTotals() {
+    const totals = {
+      subtotal: 0,
+      total: 0,
+    };
+
+    // Subtotal
+    const subscriptionItems = this.getSubscriptionItems();
+    const currency = this.currency;
+    subscriptionItems.forEach((subscriptionItem) => {
+      totals.subtotal += subscriptionItem.totalCurrentPrice(currency);
+    });
+
+    // Total
+    this.refreshShipping();
+    totals.total = totals.subtotal;
+    if (this.shippingCost) {
+      totals.total += this.shippingCost;
+    }
+
+    return totals;
+  },
+
   subscriptionDiscount() {
     const subscriptionItems = this.getSubscriptionItems();
     let discount = 0;

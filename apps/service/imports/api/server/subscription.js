@@ -142,16 +142,19 @@ export const createSubscription = ({ storeId, subscriptionData }) => {
   return { subscriptionId };
 };
 
-const prepareSubscriptionData = subscription => ({
-  subscriptionId: subscription._id,
-  startDate: subscription.startDate || null,
-  renewalFrequencyId: subscription.renewalFrequencyId,
-  renewalDate: subscription.renewalDate || null,
-  statusId: subscription.statusId || null,
-  subtotal: +subscription.subscriptionSubtotal().toFixed(2),
-  shipping: +subscription.getShippingCost().toFixed(2),
-  total: +subscription.subscriptionTotal().toFixed(2),
-});
+const prepareSubscriptionData = (subscription) => {
+  const totals = subscription.subscriptionTotals();
+  return {
+    subscriptionId: subscription._id,
+    startDate: subscription.startDate || null,
+    renewalFrequencyId: subscription.renewalFrequencyId,
+    renewalDate: subscription.renewalDate || null,
+    statusId: subscription.statusId || null,
+    subtotal: +totals.subtotal.toFixed(2),
+    shipping: +subscription.getShippingCost().toFixed(2),
+    total: +totals.total.toFixed(2),
+  };
+};
 
 const prepareCustomerData = (subscription) => {
   const customer = subscription.getCustomer();
@@ -207,15 +210,16 @@ const prepareSubscriptionItems = (subscription) => {
         productVariations[item.productId] = variations;
       }
 
+      const prices = item.allPrices();
       return {
         itemId: item._id,
         productId: item.productId,
         productName: productVariation.productName,
         variationId: item.variationId,
         quantity: item.quantity,
-        individualPrice: +item.price().toFixed(2),
-        totalPrice: +item.totalPrice().toFixed(2),
-        discountedTotalPrice: +item.totalDiscountedPrice().toFixed(2),
+        individualPrice: +prices.individualPrice.toFixed(2),
+        totalPrice: +prices.totalPrice.toFixed(2),
+        discountedTotalPrice: +prices.totalDiscountedPrice.toFixed(2),
         image: productVariation.productImage,
         variations: productVariations[item.productId],
       };
@@ -224,6 +228,7 @@ const prepareSubscriptionItems = (subscription) => {
       items,
     };
   }
+
   return data;
 };
 
