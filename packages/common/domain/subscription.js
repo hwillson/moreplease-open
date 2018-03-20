@@ -291,7 +291,10 @@ const Subscription = {
     const subscriptionItems = this.getSubscriptionItems();
     const currency = this.currency;
     subscriptionItems.forEach((subscriptionItem) => {
-      totals.subtotal += subscriptionItem.totalCurrentPrice(currency);
+      totals.subtotal += subscriptionItem.totalDiscountedPrice(
+        currency,
+        this.customerId,
+      );
     });
 
     // Total

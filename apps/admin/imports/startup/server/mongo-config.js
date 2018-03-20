@@ -2,6 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import {
   SubscriptionsCollection,
   ProductsCollection,
+  SubscriptionItemsCollection,
 } from 'meteor/moreplease:common';
 
 const subscriptionIndexes = [
@@ -14,6 +15,10 @@ const productIndexes = [
   { storeId: 1 },
 ];
 
+const subItemIndexes = [
+  { subscriptionId: 1 },
+];
+
 Meteor.startup(() => {
   subscriptionIndexes.forEach((index) => {
     SubscriptionsCollection.rawCollection().createIndex(index);
@@ -21,5 +26,9 @@ Meteor.startup(() => {
 
   productIndexes.forEach((index) => {
     ProductsCollection.rawCollection().createIndex(index);
+  });
+
+  subItemIndexes.forEach((index) => {
+    SubscriptionItemsCollection.rawCollection().createIndex(index);
   });
 });

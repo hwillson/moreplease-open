@@ -137,12 +137,11 @@ const SubscriptionItem = {
   // current subscription item already has a discount applied and it's less
   // than the global customer discount, replace the subscirption item discount
   // with the global discount.
-  activeDiscountPercent() {
-    const subscription = this.subscription();
+  activeDiscountPercent(customerId) {
     const customerDiscountPercent =
       customerDiscountsCollection.activeDiscountPercent({
-        customerId: subscription.customerId,
-        storeId: subscription.storeId,
+        customerId: customerId || this.subscription().customerId,
+        storeId: this.storeId,
       });
 
     let activeDiscountPercent = this.discountPercent;
@@ -158,9 +157,9 @@ const SubscriptionItem = {
     return activeDiscountPercent;
   },
 
-  totalDiscountedPrice(currency) {
+  totalDiscountedPrice(currency, customerId = null) {
     let productPrice = this.price(currency);
-    const discount = this.activeDiscountPercent();
+    const discount = this.activeDiscountPercent(customerId);
     if (discount) {
       productPrice = +((productPrice * ((100 - discount) / 100)).toFixed(2));
     }
