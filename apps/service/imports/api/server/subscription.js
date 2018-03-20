@@ -179,11 +179,9 @@ const prepareCustomerDiscountData = (subscription) => {
     status: 'active',
     storeId: subscription.storeId,
   });
-  let customerDiscountData;
+  const customerDiscountData = {};
   if (customerDiscount) {
-    customerDiscountData = {
-      customerDiscount,
-    };
+    customerDiscountData.customerDiscount = customerDiscount;
   }
   return customerDiscountData;
 };

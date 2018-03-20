@@ -295,7 +295,6 @@ const Subscription = {
     });
 
     // Total
-    this.refreshShipping();
     totals.total = totals.subtotal;
     if (this.shippingCost) {
       totals.total += this.shippingCost;
