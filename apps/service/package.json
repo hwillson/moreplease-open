@@ -8,6 +8,7 @@
   "dependencies": {
     "@babel/runtime": "^7.0.0-beta.40",
     "body-parser": "^1.18.1",
+    "mailgun-js": "^0.7.7",
     "meteor-node-stubs": "~0.2.4",
     "moment": "^2.18.1",
     "path-to-regexp": "^2.0.0",
