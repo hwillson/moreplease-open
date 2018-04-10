@@ -9,7 +9,6 @@ Package.describe({
 
 Npm.depends({
   raven: '2.1.2',
-  'mailgun-js': '0.7.7',
 });
 
 Package.onUse(function onUse(api) {
