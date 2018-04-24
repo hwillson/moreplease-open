@@ -81,9 +81,7 @@ const Product = {
 // Collection
 const ProductsCollection = new Mongo.Collection('products', {
   transform(doc) {
-    const product = Object.create(doc);
-    _.extend(product, Product);
-    return product;
+    return { ...doc, ...Product };
   },
 });
 ProductsCollection.attachSchema(ProductSchema);
@@ -91,6 +89,54 @@ export { ProductsCollection };
 
 ProductsCollection.findProductVariations =
   productId => ProductsCollection.find({ productId });
+
+ProductsCollection.filterNonMatchingSubItems = (storeId, subItems) => {
+  const productIdToSubItems = {};
+  const productIds = new Set();
+  const variationIdToSubItems = {};
+  const variationIds = new Set();
+
+  subItems.forEach((subItem) => {
+    const variationId = subItem.variationId;
+    if (variationId) {
+      variationIds.add(variationId);
+      if (variationIdToSubItems[variationId]) {
+        variationIdToSubItems[variationId].push(subItem);
+      } else {
+        variationIdToSubItems[variationId] = [subItem];
+      }
+    } else {
+      const productId = subItem.productId;
+      productIds.add(productId);
+      if (productIdToSubItems[productId]) {
+        productIdToSubItems[productId].push(subItem);
+      } else {
+        productIdToSubItems[productId] = [subItem];
+      }
+    }
+  });
+
+  const matchingSubItems = [];
+  ProductsCollection.find({
+    storeId,
+    $or: [
+      { variationId: { $in: Array.from(variationIds) } },
+      { productId: { $in: Array.from(productIds) } },
+    ],
+  }).forEach((product) => {
+    const tmpSubItems =
+      variationIdToSubItems[product.variationId] ||
+      productIdToSubItems[product.productId];
+    tmpSubItems.forEach((subItem) => {
+      // subItem.loadedProductVariation = product;
+      matchingSubItems.push(Object.assign(
+        subItem,
+        { loadedProductVariation: product },
+      ));
+    });
+  });
+  return matchingSubItems;
+};
 
 // Methods
 const ProductMethods = {

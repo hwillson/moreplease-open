@@ -100,7 +100,9 @@ const SubscriptionItem = {
    */
   productVariation() {
     let product;
-    if (!this.variationId) {
+    if (this.loadedProductVariation) {
+      product = this.loadedProductVariation;
+    } else if (!this.variationId) {
       product = ProductsCollection.findOne({
         productId: this.productId,
         storeId: this.storeId,

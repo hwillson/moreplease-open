@@ -17,6 +17,7 @@ import date from '../utilities/date';
 import { subscriptionOrdersCollection } from './subscription_order';
 import { accountsCollection } from './account';
 import apiAccess from '../api_access/api_access';
+import { ProductsCollection } from './product';
 
 // Schema
 const SubscriptionSchema = new SimpleSchema({
@@ -232,12 +233,8 @@ const Subscription = {
     const allSubItems = SubscriptionItemsCollection.find({
       subscriptionId: this._id,
     });
-    const availableSubItems = [];
-    allSubItems.forEach((subItem) => {
-      if (subItem.productVariation()) {
-        availableSubItems.push(subItem);
-      }
-    });
+    const availableSubItems =
+      ProductsCollection.filterNonMatchingSubItems(this.storeId, allSubItems);
     return availableSubItems;
   },
 
