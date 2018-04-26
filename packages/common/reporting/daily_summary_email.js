@@ -78,8 +78,12 @@ const dailySummaryEmail = (() => {
 
     let monthlyRevenue = 0;
     activeSubs.forEach((sub) => {
-      if (sub.renewalFrequencyId === 'm2') {
+      if (sub.renewalFrequencyId === 'w2') {
+        monthlyRevenue += (sub.subscriptionTotal() * 2);
+      } else if (sub.renewalFrequencyId === 'm2') {
         monthlyRevenue += (sub.subscriptionTotal() / 2);
+      } else if (sub.renewalFrequencyId === 'm3') {
+        monthlyRevenue += (sub.subscriptionTotal() / 3);
       } else {
         monthlyRevenue += sub.subscriptionTotal();
       }
