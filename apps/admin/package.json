@@ -2,7 +2,8 @@
   "name": "admin",
   "private": true,
   "scripts": {
-    "start": "meteor --port 3100 --settings=/Users/hwillson/Documents/git/octonary/config/moreplease-open/admin/settings_local.json"
+    "start": "meteor --port 3100 --settings=/Users/hwillson/Documents/git/config/octonary/moreplease-open/admin/settings_local.json",
+    "debug": "meteor --port 3100 --settings=/Users/hwillson/Documents/git/config/octonary/moreplease-open/admin/settings_local.json --inspect"
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0-beta.40",

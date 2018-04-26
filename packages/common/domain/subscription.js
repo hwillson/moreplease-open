@@ -5,13 +5,12 @@ import { _ } from 'meteor/underscore';
 import { check } from 'meteor/check';
 import { ValidatedMethod } from 'meteor/mdg:validated-method';
 import { moment } from 'meteor/momentjs:moment';
-import { Session } from 'meteor/session';
 
 import { StoresCollection } from './store';
 import SubscriptionCustomersCollection from './subscription_customer';
 import SubscriptionItemsCollection from './subscription_item';
 import SubscriptionStatus from './subscription_status';
-import subscriptionHistoryCollection from './subscription_history';
+import { createHistoryEntry } from './subscription_history';
 import subscriptionRenewalFrequency from './subscription_renewal_frequency';
 import date from '../utilities/date';
 import { subscriptionOrdersCollection } from './subscription_order';
@@ -119,7 +118,8 @@ const Subscription = {
   },
 
   updateSubscriptionStatus(statusId) {
-    if (statusId && (statusId !== this.statusId)) {
+    const previousStatusId = this.statusId;
+    if (statusId && (statusId !== previousStatusId)) {
       SubscriptionsCollection.update(
         { _id: this._id },
         {
@@ -155,11 +155,11 @@ const Subscription = {
         });
       }
 
-      subscriptionHistoryCollection.insert({
-        subscriptionId: this._id,
-        timestamp: new Date(),
-        statusId,
+      createHistoryEntry.call({
         storeId: this.storeId,
+        subscriptionId: this._id,
+        statusId,
+        subscriptionTotal: this.subscriptionTotal(),
       });
 
       // Fire subscription status changed event

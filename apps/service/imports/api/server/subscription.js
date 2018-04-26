@@ -74,11 +74,10 @@ export const createSubscription = ({ storeId, subscriptionData }) => {
     }
 
     subscriptionId = SubscriptionsCollection.insert(subscription);
-    subscriptionHistoryCollection.insert({
-      subscriptionId,
-      timestamp: new Date(),
-      statusId: subscription.statusId,
+    subscriptionHistoryCollection.createHistoryEntry({
       storeId,
+      subscriptionId,
+      statusId: subscription.statusId,
     });
 
     const subscriptionItems = subscriptionData.subscriptionItems;

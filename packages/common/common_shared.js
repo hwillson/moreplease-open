@@ -38,6 +38,10 @@ import { subscriptionOrder, subscriptionOrdersCollection }
   from './domain/subscription_order';
 export { subscriptionOrder, subscriptionOrdersCollection };
 
+import { createHistoryEntry }
+  from './domain/subscription_history';
+export { createHistoryEntry };
+
 import { accountsCollection, addStoreId }
   from './domain/account';
 export { accountsCollection, addStoreId };

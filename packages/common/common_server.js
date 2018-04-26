@@ -1,8 +1,6 @@
 export * from './common_shared';
 
-import subscriptionHistoryCollection
-  from './domain/subscription_history';
-export { subscriptionHistoryCollection };
+export * from './domain/subscription_history';
 
 import './config/security';
 

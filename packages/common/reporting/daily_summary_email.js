@@ -3,7 +3,7 @@ import { _ } from 'meteor/underscore';
 
 import { SubscriptionsCollection } from '../domain/subscription';
 import SubscriptionStatus from '../domain/subscription_status';
-import subscriptionHistoryCollection from '../domain/subscription_history';
+import { subscriptionHistoryCollection } from '../domain/subscription_history';
 import { subscriptionOrdersCollection } from '../domain/subscription_order';
 import email from '../utilities/email';
 
