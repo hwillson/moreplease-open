@@ -43,26 +43,41 @@ const ProductSynch = {
       if (response && response.data && response.data.data) {
         const products = JSON.parse(response.data.data);
         ProductsCollection.remove({ storeId: store._id });
+
+        // Used to make sure duplicate productId->variationId combos aren't
+        // added.
+        const productIdToVariationId = {};
+
         products.forEach((product) => {
-          const newProduct = product;
-          newProduct.storeId = store._id;
-          // If a variation price is provided without currency, this is a
-          // default USD price; store this as a USD currency price as well.
-          if (product.variationPrice) {
-            if (product.variationPriceInCurrency) {
-              newProduct.variationPriceInCurrency.USD =
-                product.variationPrice;
-            } else {
-              newProduct.variationPriceInCurrency = {
-                USD: product.variationPrice,
-              };
-            }
+          const productId = `${product.productId}`;
+          const variationId = `${product.variationId}`;
+          if (!Object.keys(productIdToVariationId).includes(productId)) {
+            productIdToVariationId[productId] = [];
           }
-          try {
-            ProductsCollection.insert(newProduct);
-          } catch (error) {
-            // TODO - for now log any products that can't be inserted
-            console.log(error, newProduct);
+
+          if (!productIdToVariationId[productId].includes(variationId)) {
+            productIdToVariationId[productId].push(variationId);
+
+            const newProduct = product;
+            newProduct.storeId = store._id;
+            // If a variation price is provided without currency, this is a
+            // default USD price; store this as a USD currency price as well.
+            if (product.variationPrice) {
+              if (product.variationPriceInCurrency) {
+                newProduct.variationPriceInCurrency.USD =
+                  product.variationPrice;
+              } else {
+                newProduct.variationPriceInCurrency = {
+                  USD: product.variationPrice,
+                };
+              }
+            }
+            try {
+              ProductsCollection.insert(newProduct);
+            } catch (error) {
+              // TODO - for now log any products that can't be inserted
+              console.log(error, newProduct);
+            }
           }
         });
       }
