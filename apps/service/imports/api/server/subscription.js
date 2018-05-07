@@ -14,7 +14,7 @@ import {
   transmitEvent,
   customerDiscountsCollection,
 } from 'meteor/moreplease:common';
-import createCustomer from './customer';
+import { createCustomer } from './customer';
 
 export const createSubscription = ({ storeId, subscriptionData }) => {
   let subscriptionId;

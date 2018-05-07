@@ -23,6 +23,7 @@ import {
   deleteCustomerDiscount as removeCustomerDiscount,
   readCustomerDiscount,
 } from './customer_discount';
+import { updateCustomer } from './customer';
 import {
   addToSubscription,
   subscriptionRenewalDateAndStatus,
@@ -138,6 +139,14 @@ const endpoints = {
   '/customer_discounts/external/:externalCustomerId': {
     GET(request, storeId, externalCustomerId) {
       return readCustomerDiscount({ storeId, externalCustomerId });
+    },
+  },
+  '/customers/:externalId': {
+    PUT(request, storeId, externalId) {
+      const customer = request.body;
+      customer.storeId = storeId;
+      customer.externalId = externalId;
+      return updateCustomer(customer);
     },
   },
 

@@ -4,7 +4,7 @@ import {
   SubscriptionCustomersCollection,
 } from 'meteor/moreplease:common';
 
-import createCustomer from './customer';
+import { createCustomer } from './customer';
 
 export const createCustomerDiscount = ({ storeId, data }) => {
   if (storeId && data) {
