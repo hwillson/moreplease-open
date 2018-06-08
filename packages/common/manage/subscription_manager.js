@@ -481,6 +481,9 @@ const SubscriptionManager = {
       });
       order.tags = 'subscription_renewal_order';
       order.note = `Subscription ID: ${subscription._id} \n\n${discountNotes}`;
+      if (subscription.notes) {
+        order.note = `Customer Notes:\n${subscription.notes}\n\n${order.note}`;
+      }
 
       const response = HTTP.post(
         `${store.webServiceUrl}/orders.json`,

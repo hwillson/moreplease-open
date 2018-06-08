@@ -106,6 +106,10 @@ const SubscriptionSchema = new SimpleSchema({
     optional: true,
     defaultValue: 0,
   },
+  notes: {
+    type: String,
+    optional: true,
+  },
 });
 
 let SubscriptionsCollection;
@@ -397,6 +401,19 @@ const Subscription = {
       subscriptionId: this._id,
     }).count();
     return orderCount ? orderCount - 1 : 0;
+  },
+
+  updateNotes(notes) {
+    if (notes) {
+      SubscriptionsCollection.update(
+        { _id: this._id },
+        {
+          $set: {
+            notes,
+          },
+        },
+      );
+    }
   },
 };
 
