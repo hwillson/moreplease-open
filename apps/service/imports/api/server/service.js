@@ -39,7 +39,7 @@ const getStoreId = (authHeader) => {
   let storeId;
   if (authHeader) {
     const token = authHeader.replace('Bearer ', '');
-    const apiKey = new Buffer(token, 'base64').toString('ascii');
+    const apiKey = new Buffer(token, 'base64').toString('ascii').trim();
     storeId = apiAccess.findStoreIdForApiKey(apiKey);
   }
   return storeId;

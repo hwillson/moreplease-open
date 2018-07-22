@@ -4,7 +4,6 @@ import { ValidatedMethod } from 'meteor/mdg:validated-method';
 import { Meteor } from 'meteor/meteor';
 import { Roles } from 'meteor/alanning:roles';
 import { check } from 'meteor/check';
-import { _ } from 'meteor/underscore';
 
 import SubscriptionItemsCollection from './subscription_item';
 
@@ -37,9 +36,27 @@ const ProductSchema = new SimpleSchema({
     label: 'Variation Name',
     optional: true,
   },
+  // `variationPrice` is always the current price. That means it could have
+  // a discount already applied by the source store, if a product is on
+  // sale.
   variationPrice: {
     type: Number,
-    label: 'Variation Price',
+    label: 'Variation Current Price',
+    optional: true,
+    decimal: true,
+  },
+  // `variationRetailPrice` is the original (non-discounted) price of a
+  // product.
+  variationRetailPrice: {
+    type: Number,
+    label: 'Variation Retail (Original) Price',
+    optional: true,
+    decimal: true,
+  },
+  // `variationSalePrice` is the sale price of a product.
+  variationSalePrice: {
+    type: Number,
+    label: 'Variation Sale Price',
     optional: true,
     decimal: true,
   },

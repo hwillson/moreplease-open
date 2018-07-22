@@ -118,13 +118,22 @@ const ProductSynch = {
       if (product.variants) {
         product.variants.forEach((variant) => {
           if (variant.sku.indexOf('TF_SUB_') === -1) {
+            // If a product is not on sale, Shopify returns the retail price
+            // in the `variant.price` field. If a product is on sale the
+            // retail price comes back in the `variant.compare_at_price`
+            // field, with the discounted price coming back in the
+            // `variant.price` field.
+            const currentPrice = variant.price;
+            const retailPrice = variant.compare_at_price;
             const newVariant = {
               productId: product.id,
               productUrl: `${store.url}/products/${product.handle}`,
               productName: product.title,
               variationId: variant.id,
               variationName: variant.title,
-              variationPrice: variant.price,
+              variationPrice: currentPrice,
+              variationRetailPrice: retailPrice || currentPrice,
+              variationSalePrice: retailPrice ? currentPrice : null,
               variationPriceInCurrency: {
                 USD: variant.price,
               },

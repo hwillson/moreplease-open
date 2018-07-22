@@ -137,7 +137,7 @@ const SubscriptionItem = {
   // account. If a global customer discount exists (and it's active), make
   // sure each subscription item is setup to use that global discount. If the
   // current subscription item already has a discount applied and it's less
-  // than the global customer discount, replace the subscirption item discount
+  // than the global customer discount, replace the subscription item discount
   // with the global discount.
   activeDiscountPercent(customerId) {
     const customerDiscountPercent =
@@ -159,12 +159,36 @@ const SubscriptionItem = {
     return activeDiscountPercent;
   },
 
-  totalDiscountedPrice(currency, customerId = null) {
-    let productPrice = this.price(currency);
+  getPriceOrSalePriceOrMemberDiscountedPrice(
+    currency,
+    customerId,
+    productVariation,
+  ) {
+    const variation = productVariation || this.productVariation();
+    let currentPrice = this.price(currency);
     const discount = this.activeDiscountPercent(customerId);
     if (discount) {
-      productPrice = +((productPrice * ((100 - discount) / 100)).toFixed(2));
+      let memberDiscountedPrice;
+      const retailPrice = variation.variationRetailPrice;
+      if (retailPrice) {
+        memberDiscountedPrice =
+          +((retailPrice * ((100 - discount) / 100)).toFixed(2));
+        currentPrice =
+          memberDiscountedPrice < currentPrice
+            ? memberDiscountedPrice
+            : currentPrice;
+      } else {
+        memberDiscountedPrice =
+          +((currentPrice * ((100 - discount) / 100)).toFixed(2));
+        currentPrice = memberDiscountedPrice;
+      }
     }
+    return currentPrice;
+  },
+
+  totalDiscountedPrice(currency, customerId = null) {
+    const productPrice =
+      this.getPriceOrSalePriceOrMemberDiscountedPrice(currency, customerId);
     return productPrice * this.quantity;
   },
 
@@ -179,13 +203,12 @@ const SubscriptionItem = {
     if (productVariation) {
       prices.individualPrice = productVariation.variationPrice;
       prices.totalPrice = prices.individualPrice * this.quantity;
-      const discount = this.activeDiscountPercent();
-      if (discount) {
-        let individualPrice = prices.individualPrice;
-        individualPrice =
-          +((individualPrice * ((100 - discount) / 100)).toFixed(2));
-        prices.totalDiscountedPrice = individualPrice * this.quantity;
-      }
+      const currentPrice = this.getPriceOrSalePriceOrMemberDiscountedPrice(
+        null,
+        null,
+        productVariation,
+      );
+      prices.totalDiscountedPrice = currentPrice * this.quantity;
     }
 
     return prices;

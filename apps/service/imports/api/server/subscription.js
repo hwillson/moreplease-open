@@ -201,6 +201,7 @@ const prepareSubscriptionItems = (subscription) => {
               name: variation.variationName,
               image: variation.productImage,
               price: variation.variationPrice,
+              retailPrice: variation.variationRetailPrice,
             };
           },
         );
