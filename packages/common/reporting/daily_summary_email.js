@@ -34,6 +34,8 @@ const dailySummaryEmail = (() => {
         privateApi.getPausedSubsTodayCount(storeId);
       dailySummary.pausedSubsTodayRevenue =
         privateApi.getPausedSubsTodayRevenue(storeId);
+      dailySummary.pausedSubsToday =
+        privateApi.getPausedSubsToday(storeId);
 
       dailySummary.cancelledSubsTodayCount =
         privateApi.getCancelledSubsTodayCount(storeId);
@@ -144,6 +146,27 @@ const dailySummaryEmail = (() => {
     });
     return +lostRevenue.toFixed(2);
   };
+
+  privateApi.getPausedSubsToday = storeId => (
+    subscriptionHistoryCollection.find({
+      storeId,
+      statusId: SubscriptionStatus.paused.id,
+      timestamp: {
+        $gte: moment().subtract(1, 'day').startOf('day').toDate(),
+        $lt: moment().subtract(1, 'day').endOf('day').toDate(),
+      },
+    }).map((sub) => {
+      const subData =
+        SubscriptionsCollection.findOne({ _id: sub.subscriptionId });
+      return {
+        name: subData.customerName(),
+        daysSinceFirstOrder: subData.daysSinceFirstOrder(),
+        renewalCount: subData.renewalCount(),
+        // Represents the amount of the subscription when it was cancelled.
+        total: subData.subscriptionTotal(),
+      };
+    })
+  );
 
   privateApi.getCancelledSubsTodayCount = storeId => (
     subscriptionHistoryCollection.find({
@@ -294,6 +317,23 @@ const dailySummaryEmail = (() => {
           Count: ${dailySummary.pausedSubsTodayCount} <br />
           Lost Revenue: $${dailySummary.pausedSubsTodayRevenue}
         </p>
+      `;
+
+      if (dailySummary.pausedSubsToday) {
+        content += '<ul>';
+        dailySummary.pausedSubsToday.forEach((sub) => {
+          content +=
+            '<li>' +
+            `${sub.name}, ` +
+            `${sub.daysSinceFirstOrder} days since first order, ` +
+            `${sub.renewalCount} renewals, ` +
+            `$${sub.total.toFixed(2)}` +
+            '</li>';
+        });
+        content += '</ul>';
+      }
+
+      content += `
         <p>
           <strong>Cancelled Subscriptions Today</strong> <br />
           Count: ${dailySummary.cancelledSubsTodayCount} <br />
