@@ -11,6 +11,8 @@
     "raven": "^2.4.1"
   },
   "now": {
-    "regions": ["sfo1"]
+    "regions": [
+      "sfo1"
+    ]
   }
 }
