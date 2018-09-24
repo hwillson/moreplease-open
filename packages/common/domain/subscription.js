@@ -139,6 +139,9 @@ const Subscription = {
         nextShipmentDate: this.renewalDate,
         totalSubscriptionPrice: +this.subscriptionTotal().toFixed(2),
         subscriptionItems: this.getSubscriptionItems(),
+        renewalFrequencyLabel: this.renewalFrequencyLabel(),
+        totalOrders: this.totalOrders(),
+        totalSpent: this.totalSpent(),
       };
 
       // If the current status is "failed" and the new status is "active",
@@ -397,6 +400,29 @@ const Subscription = {
       subscriptionId: this._id,
     }).count();
     return orderCount ? orderCount - 1 : 0;
+  },
+
+  renewalFrequencyLabel() {
+    return subscriptionRenewalFrequency[this.renewalFrequencyId].label;
+  },
+
+  totalOrders() {
+    const orderCount = subscriptionOrdersCollection.find({
+      subscriptionId: this._id,
+    }).count();
+    return orderCount || 0;
+  },
+
+  totalSpent() {
+    let total = 0;
+    subscriptionOrdersCollection.find({
+      subscriptionId: this._id,
+    }).forEach((order) => {
+      if (order.totalPrice) {
+        total += order.totalPrice;
+      }
+    });
+    return total;
   },
 };
 

@@ -302,6 +302,9 @@ const SubscriptionManager = {
           totalSubscriptionPrice:
             +subscription.subscriptionTotal().toFixed(2),
           subscriptionItems: subscription.getSubscriptionItems(),
+          renewalFrequencyLabel: subscription.renewalFrequencyLabel(),
+          totalOrders: subscription.totalOrders(),
+          totalSpent: subscription.totalSpent(),
         },
       });
     });

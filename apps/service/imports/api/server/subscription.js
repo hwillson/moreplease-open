@@ -134,6 +134,9 @@ export const createSubscription = ({ storeId, subscriptionData }) => {
           +newSubscription.subscriptionTotal().toFixed(2),
         subscriptionItems: newSubscription.getSubscriptionItems(),
         isFreeTrial: newSubscription.isFreeTrialSubscription(),
+        renewalFrequencyLabel: newSubscription.renewalFrequencyLabel(),
+        totalOrders: 1,
+        totalSpent: newSubscription.totalSpent(),
       },
     });
   }
