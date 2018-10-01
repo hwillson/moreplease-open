@@ -185,6 +185,13 @@ Template.adminSubscription.events({
     this.updateRenewalFrequency(frequencyId);
   },
 
+  'change .js-subscription-notes': _.debounce(function saveNotes(e) {
+    const notes = $(e.currentTarget).val();
+    if (notes) {
+      this.updateNotes(notes);
+    }
+  }, 100),
+
   'click .subscription-renew-now'(event) {
     event.preventDefault();
     swal({
