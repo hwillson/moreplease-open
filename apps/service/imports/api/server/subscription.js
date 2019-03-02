@@ -223,6 +223,7 @@ const prepareSubscriptionItems = (subscription) => {
         discountedTotalPrice: +prices.totalDiscountedPrice.toFixed(2),
         image: productVariation.productImage,
         variations: productVariations[item.productId],
+        oneTime: item.oneTime,
       };
     });
     data = {

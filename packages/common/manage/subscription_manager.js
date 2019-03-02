@@ -444,6 +444,7 @@ const SubscriptionManager = {
 
       order.line_items = [];
       let discountNotes = '';
+      let onetimeNotes = '';
       subscriptionItems.forEach((item) => {
         order.line_items.push({
           variant_id: item.variationId,
@@ -454,9 +455,14 @@ const SubscriptionManager = {
             `- ${item.productName} (${item.variationName}): `
             + `${item.discountPercent}%\n`;
         }
+        if (item.oneTime) {
+          onetimeNotes += `- ${item.productName} (${item.variationName})\n`;
+        }
       });
       discountNotes =
         _.isEmpty(discountNotes) ? '' : `Discounts: \n${discountNotes}`;
+      onetimeNotes =
+        _.isEmpty(onetimeNotes) ? '' : `One-time items: \n${onetimeNotes}`;
 
       order.customer.id = subCustomer.externalId;
 
@@ -483,7 +489,10 @@ const SubscriptionManager = {
         status: 'success',
       });
       order.tags = 'subscription_renewal_order';
-      order.note = `Subscription ID: ${subscription._id} \n\n${discountNotes}`;
+      order.note =
+        `Subscription ID: ${subscription._id} \n\n` +
+        `${discountNotes} \n\n` +
+        `${onetimeNotes}`;
       if (subscription.notes) {
         order.note = `Customer Notes:\n${subscription.notes}\n\n${order.note}`;
       }
@@ -516,6 +525,11 @@ const SubscriptionManager = {
         subscription.resetBillingRetryCount();
 
         this._triggerRenewedEvent({ storeId: store._id, subscription });
+
+        // Remove any onetime subscription items that need to be cleared
+        // after a successful renewal
+        SubscriptionItemsCollection.removeOneTimeItems(subscription._id);
+
         renewedSuccessfuly = true;
 
         // If the subscription has an associated draft order, flag that it

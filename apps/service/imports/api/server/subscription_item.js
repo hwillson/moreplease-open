@@ -90,6 +90,9 @@ export const updateSubscriptionItem = ({ storeId, itemId, itemData }) => {
       if (itemData.discountPercent) {
         updateData.discountPercent = itemData.discountPercent;
       }
+      if (typeof itemData.oneTime !== 'undefined') {
+        updateData.oneTime = itemData.oneTime;
+      }
       if (Object.keys(updateData).length) {
         SubscriptionItemsCollection.update({
           _id: itemId,
