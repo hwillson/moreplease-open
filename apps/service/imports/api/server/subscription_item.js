@@ -87,7 +87,7 @@ export const updateSubscriptionItem = ({ storeId, itemId, itemData }) => {
       if (itemData.quantity) {
         updateData.quantity = itemData.quantity;
       }
-      if (itemData.discountPercent) {
+      if (typeof itemData.discountPercent !== 'undefined') {
         updateData.discountPercent = itemData.discountPercent;
       }
       if (typeof itemData.oneTime !== 'undefined') {
