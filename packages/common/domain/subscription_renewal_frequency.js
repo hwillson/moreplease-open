@@ -55,4 +55,15 @@ export default {
     }
     return renewalDate;
   },
+
+  labelValues() {
+    return [
+      { label: this.w1.label, value: this.w1.id },
+      { label: this.w2.label, value: this.w2.id },
+      { label: this.w6.label, value: this.w6.id },
+      { label: this.m1.label, value: this.m1.id },
+      { label: this.m2.label, value: this.m2.id },
+      { label: this.m3.label, value: this.m3.id },
+    ];
+  },
 };

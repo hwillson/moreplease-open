@@ -51,6 +51,12 @@ const SubscriptionSchema = new SimpleSchema({
     type: String,
     label: 'Renewal Frequency',
     defaultValue: subscriptionRenewalFrequency.m1.id,
+    autoform: {
+      type: 'select',
+      options() {
+        return subscriptionRenewalFrequency.labelValues();
+      },
+    },
   },
   renewalDate: {
     type: Date,
@@ -66,6 +72,9 @@ const SubscriptionSchema = new SimpleSchema({
     type: String,
     label: 'Status ID',
     optional: true,
+    autoform: {
+      type: 'hidden',
+    },
   },
   shippingMethodId: {
     type: String,
@@ -87,10 +96,16 @@ const SubscriptionSchema = new SimpleSchema({
     type: String,
     label: 'Subscription Currency',
     defaultValue: 'USD', // http://openexchangerates.org/api/currencies.json
+    autoform: {
+      type: 'hidden',
+    },
   },
   storeId: {
     type: String,
     label: 'Store ID',
+    autoform: {
+      type: 'hidden',
+    },
   },
   draftOrderId: {
     type: String,
@@ -109,6 +124,14 @@ const SubscriptionSchema = new SimpleSchema({
   notes: {
     type: String,
     optional: true,
+    autoform: {
+      type: 'textarea',
+    },
+  },
+  customerExternalId: {
+    type: Number,
+    optional: true,
+    label: 'External Customer ID',
   },
 });
 
@@ -546,33 +569,31 @@ SubscriptionMethods.cancelSubscription = new ValidatedMethod({
     let subscriptionCancelled = false;
     if (this.isSimulation) {
       subscriptionCancelled = true;
+    } else if (!this.userId) {
+      // Not logged in, so cancellation is coming from customer frontend.
+      const storeId = apiAccess.findStoreIdForApiKey(apiKey);
+      const subscription = SubscriptionsCollection.findOne({
+        _id: subscriptionId,
+        storeId,
+      });
+      if (subscription) {
+        import subscriptionManager from '../manage/subscription_manager';
+        subscriptionCancelled =
+          subscriptionManager.cancelSubscription(subscriptionId);
+      }
     } else {
-      if (!this.userId) {
-        // Not logged in, so cancellation is coming from customer frontend.
-        const storeId = apiAccess.findStoreIdForApiKey(apiKey);
-        const subscription = SubscriptionsCollection.findOne({
-          _id: subscriptionId,
-          storeId,
-        });
-        if (subscription) {
-          import subscriptionManager from '../manage/subscription_manager';
-          subscriptionCancelled =
-            subscriptionManager.cancelSubscription(subscriptionId);
-        }
-      } else {
-        // Logged in, so cancellation is coming from the admin.
-        const subscription = SubscriptionsCollection.findOne({
-          _id: subscriptionId,
-        });
-        const accountId = Meteor.user().accountId;
-        if (accountsCollection.hasStoreAccess(
-          accountId,
-          subscription.storeId,
-        )) {
-          import subscriptionManager from '../manage/subscription_manager';
-          subscriptionCancelled =
-            subscriptionManager.cancelSubscription(subscriptionId);
-        }
+      // Logged in, so cancellation is coming from the admin.
+      const subscription = SubscriptionsCollection.findOne({
+        _id: subscriptionId,
+      });
+      const accountId = Meteor.user().accountId;
+      if (accountsCollection.hasStoreAccess(
+        accountId,
+        subscription.storeId,
+      )) {
+        import subscriptionManager from '../manage/subscription_manager';
+        subscriptionCancelled =
+          subscriptionManager.cancelSubscription(subscriptionId);
       }
     }
     return subscriptionCancelled;
@@ -594,6 +615,40 @@ SubscriptionMethods.createSubscriptionRenewal = new ValidatedMethod({
       );
     }
     return renewed;
+  },
+});
+
+SubscriptionMethods.createSubscription = new ValidatedMethod({
+  name: 'subscription.createSubscription',
+  validate: SubscriptionSchema.validator(),
+  run(sub) {
+    if (!this.isSimulation && this.userId) {
+      const customerId = SubscriptionCustomersCollection.insert({
+        externalId: sub.customerExternalId,
+        firstName: sub.customerFirstName,
+        lastName: sub.customerLastName,
+        email: sub.customerEmail,
+        storeId: sub.storeId,
+      });
+      const modifiedSub = { ...sub, customerId };
+      delete modifiedSub.customerExternalId;
+
+      if (!modifiedSub.renewalDate) {
+        modifiedSub.renewalDate =
+          subscriptionRenewalFrequency.renewalDateForFrequency(
+            modifiedSub.renewalFrequencyId,
+          ).toDate();
+      }
+
+      const subscriptionId = SubscriptionsCollection.insert(modifiedSub);
+
+      import { sendSubIdToShopify } from './shopify';
+      sendSubIdToShopify({
+        shopifyCustomerId: sub.customerExternalId,
+        storeId: sub.storeId,
+        subscriptionId,
+      });
+    }
   },
 });
 

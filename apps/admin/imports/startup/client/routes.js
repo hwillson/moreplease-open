@@ -8,6 +8,7 @@ import '../../templates/welcome/welcome';
 import '../../templates/dashboard/dashboard';
 import '../../templates/subscriptions/subscriptions';
 import '../../templates/subscriptions/subscription';
+import '../../templates/subscriptions/new-subscription';
 import '../../templates/products/products';
 import '../../templates/settings/emails';
 import '../../templates/settings/store';
@@ -58,6 +59,14 @@ FlowRouter.route('/subscription', {
   action: (params, queryParams) => {
     Session.set('subscriptionId', queryParams.id);
     BlazeLayout.render('adminLayout', { main: 'adminSubscription' });
+  },
+});
+
+FlowRouter.route('/new-subscription', {
+  name: 'adminNewSubscription',
+  triggersEnter: [ensureLoggedIn],
+  action: () => {
+    BlazeLayout.render('adminLayout', { main: 'adminNewSubscription' });
   },
 });
 

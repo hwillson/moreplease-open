@@ -11,12 +11,27 @@
               Dashboard
             </a>
           </li>
-          <li class="{{isActiveRoute 'adminSubscriptions'}}
-              {{isActiveRoute 'adminSubscription'}}">
-            <a href="{{pathFor 'adminSubscriptions'}}">
-              <i class="fa fa-users"></i> Subscriptions
+
+          <li class="treeview">
+            <a href="#">
+              <i class="fa fa-users"></i>
+              <span>Subscriptions</span>
+              <i class="fa fa-angle-left pull-right"></i>
             </a>
+            <ul class="treeview-menu">
+              <li class="{{isActiveRoute 'adminSubscriptions'}}">
+                <a href="{{pathFor 'adminSubscriptions'}}">
+                  List
+                </a>
+              </li>
+              <li class="{{isActiveRoute 'adminNewSubscription'}}">
+                <a href="{{pathFor 'adminNewSubscription'}}">
+                  New
+                </a>
+              </li>
+            </ul>
           </li>
+
           <li class="{{isActiveRoute 'adminProducts'}}">
             <a href="{{pathFor 'adminProducts'}}">
               <i class="fa fa-shopping-cart"></i> Products

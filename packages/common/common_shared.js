@@ -22,9 +22,16 @@ import { ProductsCollection, ProductMethods }
   from './domain/product';
 export { ProductsCollection, ProductMethods };
 
-import { Subscription, SubscriptionsCollection, SubscriptionMethods }
-  from './domain/subscription';
-export { Subscription, SubscriptionsCollection, SubscriptionMethods };
+import {
+  Subscription,
+  SubscriptionsCollection,
+  SubscriptionMethods,
+} from './domain/subscription';
+export {
+  Subscription,
+  SubscriptionsCollection,
+  SubscriptionMethods,
+};
 
 import SubscriptionCustomersCollection
   from './domain/subscription_customer';

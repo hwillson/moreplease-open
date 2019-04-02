@@ -1,0 +1,65 @@
+<template name="adminNewSubscription">
+  <div class="admin-new-subscription">
+    <section class="content-header">
+      <h1>
+        <i class="fa fa-plus-circle"></i> New Subscription
+      </h1>
+      <ol class="breadcrumb">
+        <li>
+          <a href="{{pathFor 'adminDashbaord'}}">
+            <i class="fa fa-map"></i> Dashboard
+          </a>
+        </li>
+        <li>Subscriptions</li>
+        <li class="active">New</li>
+      </ol>
+    </section>
+
+    <section class="content">
+      <div class="box">
+        <div class="box-body">
+          <div class="row">
+            <div class="col-md-6">
+              {{#if Template.subscriptionsReady}}
+                {{#autoForm
+                  id=formId
+                  collection=collection
+                  doc=subscription
+                  type=type
+                  meteormethod=method
+                  singleMethodArgument=singleMethodArgument
+                }}
+                  {{> afQuickField name="storeId" value=storeId}}
+                  {{> afQuickField name="currency" value="USD"}}
+                  {{> afQuickField name="statusId" value="paused"}}
+
+                  {{> afQuickField name="customerFirstName"}}
+                  {{> afQuickField name="customerLastName"}}
+                  {{> afQuickField name="customerEmail"}}
+                  {{> afQuickField name="customerExternalId" placeholder="E.g. Shopify customer ID"}}
+                  {{> afQuickField name="renewalFrequencyId"}}
+                  {{> afQuickField name="renewalDate"}}
+                  <p style="padding: 0; margin-top: -10px;">
+                    <small>
+                      Leave this blank to have it automatically calculated
+                      based on the renewal frequency.
+                    </small>
+                  </p>
+                  {{> afQuickField name="notes"}}
+
+                  <div class="text-right">
+                    <button type="submit" class="btn btn-primary btn-save">
+                      Save
+                    </button>
+                  </div>
+                {{/autoForm}}
+              {{else}}
+                Loading ...
+              {{/if}}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</template>
