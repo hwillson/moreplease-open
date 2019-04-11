@@ -265,10 +265,11 @@ const Subscription = {
     });
 
     const store = StoresCollection.findOne({ _id: this.storeId });
-    const subTotal = this.subscriptionSubtotalWithoutDiscounts();
+    const subTotal = this.subscriptionSubtotalWithoutDiscounts(subItems);
 
     const availableSubItems = ProductsCollection.filterNonMatchingSubItems({
-      store,
+      smallRenewalDiscountPercent: store.smallRenewalDiscountPercent,
+      largeRenewalDiscountPercent: store.largeRenewalDiscountPercent,
       subTotal,
       subItems,
     });
@@ -296,11 +297,10 @@ const Subscription = {
     });
   },
 
-  subscriptionSubtotalWithoutDiscounts() {
-    const subscriptionItems = this.getSubscriptionItems();
+  subscriptionSubtotalWithoutDiscounts(subItems) {
     let subscriptionSubtotal = 0;
     const currency = this.currency;
-    subscriptionItems.forEach((subscriptionItem) => {
+    subItems.forEach((subscriptionItem) => {
       subscriptionSubtotal += subscriptionItem.totalPrice(currency);
     });
     return subscriptionSubtotal;
