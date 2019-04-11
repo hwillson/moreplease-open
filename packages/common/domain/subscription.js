@@ -268,6 +268,7 @@ const Subscription = {
     const subTotal = this.subscriptionSubtotalWithoutDiscounts(subItems);
 
     const availableSubItems = ProductsCollection.filterNonMatchingSubItems({
+      storeId: this.storeId,
       smallRenewalDiscountPercent: store.smallRenewalDiscountPercent,
       largeRenewalDiscountPercent: store.largeRenewalDiscountPercent,
       subTotal,

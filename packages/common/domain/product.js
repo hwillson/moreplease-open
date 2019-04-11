@@ -116,6 +116,7 @@ ProductsCollection.findProductVariations =
   productId => ProductsCollection.find({ productId });
 
 ProductsCollection.filterNonMatchingSubItems = ({
+  storeId,
   smallRenewalDiscountPercent,
   largeRenewalDiscountPercent,
   subTotal,
@@ -148,7 +149,7 @@ ProductsCollection.filterNonMatchingSubItems = ({
 
   const matchingSubItems = [];
   ProductsCollection.find({
-    storeId: this.storeId,
+    storeId,
     $or: [
       { variationId: { $in: Array.from(variationIds) } },
       { productId: { $in: Array.from(productIds) } },
