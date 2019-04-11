@@ -450,11 +450,10 @@ const SubscriptionManager = {
           variant_id: item.variationId,
           quantity: item.quantity,
         });
-        const discountPercent = item.activeDiscountPercent();
-        if (discountPercent) {
+        if (item.discountPercent) {
           discountNotes +=
             `- ${item.productName} (${item.variationName}): `
-            + `${discountPercent}%\n`;
+            + `${item.discountPercent}%\n`;
         }
         if (item.oneTime) {
           onetimeNotes += `- ${item.productName} (${item.variationName})\n`;
