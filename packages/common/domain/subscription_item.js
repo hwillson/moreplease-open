@@ -150,7 +150,7 @@ const SubscriptionItem = {
     return this.price(currency) * this.quantity;
   },
 
-  activeDiscountPercent({ customerId }) {
+  activeDiscountPercent(customerId) {
     let activeDiscountPercent = 0;
 
     if (
