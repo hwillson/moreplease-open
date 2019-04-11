@@ -55,7 +55,7 @@ customerDiscountsCollection.createNewDiscount = ({
       status: 'archived',
     },
   });
-console.log('durationMonths', durationMonths);
+
   const now = moment();
   const validFromDate = now.toDate();
   const validToDate = now.add(durationMonths, 'months').toDate();

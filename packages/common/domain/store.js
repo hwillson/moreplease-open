@@ -145,6 +145,16 @@ const StoreSchema = new SimpleSchema({
     label: 'Free Shipping Minimum (-1 to disable)',
     defaultValue: -1,
   },
+  smallRenewalDiscountPercent: {
+    type: Number,
+    label: 'Renewal Discount Percent (Small)',
+    optional: true,
+  },
+  largeRenewalDiscountPercent: {
+    type: Number,
+    label: 'Renewal Discount Percent (Large)',
+    optional: true,
+  },
 });
 
 // Model

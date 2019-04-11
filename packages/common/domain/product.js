@@ -86,6 +86,14 @@ const ProductSchema = new SimpleSchema({
     type: String,
     label: 'Store ID',
   },
+  tags: {
+    type: [String],
+    optional: true,
+  },
+  maxRenewalDiscountPercent: {
+    type: Number,
+    optional: true,
+  },
 });
 
 // Model
@@ -107,7 +115,11 @@ export { ProductsCollection };
 ProductsCollection.findProductVariations =
   productId => ProductsCollection.find({ productId });
 
-ProductsCollection.filterNonMatchingSubItems = (storeId, subItems) => {
+ProductsCollection.filterNonMatchingSubItems = ({
+  store,
+  subTotal,
+  subItems,
+}) => {
   const productIdToSubItems = {};
   const productIds = new Set();
   const variationIdToSubItems = {};
@@ -135,7 +147,7 @@ ProductsCollection.filterNonMatchingSubItems = (storeId, subItems) => {
 
   const matchingSubItems = [];
   ProductsCollection.find({
-    storeId,
+    storeId: store._id,
     $or: [
       { variationId: { $in: Array.from(variationIds) } },
       { productId: { $in: Array.from(productIds) } },
@@ -148,7 +160,13 @@ ProductsCollection.filterNonMatchingSubItems = (storeId, subItems) => {
       // subItem.loadedProductVariation = product;
       matchingSubItems.push(Object.assign(
         subItem,
-        { loadedProductVariation: product },
+        {
+          loadedProductVariation: product,
+          smallRenewalDiscountPercent: store.smallRenewalDiscountPercent,
+          largeRenewalDiscountPercent: store.largeRenewalDiscountPercent,
+          maxRenewalDiscountPercent: product.maxRenewalDiscountPercent,
+          subTotal,
+        },
       ));
     });
   });

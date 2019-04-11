@@ -54,6 +54,23 @@ const SubscriptionItemSchema = new SimpleSchema({
     optional: true,
     defaultValue: false,
   },
+  smallRenewalDiscountPercent: {
+    type: Number,
+    optional: true,
+  },
+  largeRenewalDiscountPercent: {
+    type: Number,
+    optional: true,
+  },
+  maxRenewalDiscountPercent: {
+    type: Number,
+    optional: true,
+  },
+  subTotal: {
+    type: Number,
+    optional: true,
+    decimal: true,
+  },
 });
 
 let SubscriptionItemsCollection;
@@ -133,27 +150,53 @@ const SubscriptionItem = {
     return this.price(currency) * this.quantity;
   },
 
-  // Customers can have global discounts associated with their customer
-  // account. If a global customer discount exists (and it's active), make
-  // sure each subscription item is setup to use that global discount. If the
-  // current subscription item already has a discount applied and it's less
-  // than the global customer discount, replace the subscription item discount
-  // with the global discount.
-  activeDiscountPercent(customerId) {
-    const customerDiscountPercent =
-      customerDiscountsCollection.activeDiscountPercent({
-        customerId: customerId || this.subscription().customerId,
-        storeId: this.storeId,
-      });
+  activeDiscountPercent({ customerId }) {
+    let activeDiscountPercent = 0;
 
-    let activeDiscountPercent = this.discountPercent;
-    if (activeDiscountPercent &&
-      customerDiscountPercent &&
-      activeDiscountPercent < customerDiscountPercent
+    if (
+      this.smallRenewalDiscountPercent &&
+      this.largeRenewalDiscountPercent &&
+      this.subTotal
     ) {
-      activeDiscountPercent = customerDiscountPercent;
-    } else if (customerDiscountPercent && !activeDiscountPercent) {
-      activeDiscountPercent = customerDiscountPercent;
+      // A store can have a small and large subscription discount set, that's
+      // applied to all subscription products when renewing. The small discount
+      // is used by default, but if a subscription total is >= $100, the
+      // large subscription discount is used instead.
+      //
+      // Products can individually set a maximum allowed discount, which takes
+      // precedence over both the small and large discount amounts.
+      activeDiscountPercent =
+        this.subTotal >= 100
+          ? this.largeRenewalDiscountPercent
+          : this.smallRenewalDiscountPercent;
+      if (
+        this.maxRenewalDiscountPercent &&
+        this.maxRenewalDiscountPercent < activeDiscountPercent
+      ) {
+        activeDiscountPercent = this.maxRenewalDiscountPercent;
+      }
+    } else {
+      // Customers can have global discounts associated with their customer
+      // account. If a global customer discount exists (and it's active), make
+      // sure each subscription item is setup to use that global discount. If the
+      // current subscription item already has a discount applied and it's less
+      // than the global customer discount, replace the subscription item discount
+      // with the global discount.
+      const customerDiscountPercent =
+        customerDiscountsCollection.activeDiscountPercent({
+          customerId: customerId || this.subscription().customerId,
+          storeId: this.storeId,
+        });
+
+      activeDiscountPercent = this.discountPercent;
+      if (activeDiscountPercent &&
+        customerDiscountPercent &&
+        activeDiscountPercent < customerDiscountPercent
+      ) {
+        activeDiscountPercent = customerDiscountPercent;
+      } else if (customerDiscountPercent && !activeDiscountPercent) {
+        activeDiscountPercent = customerDiscountPercent;
+      }
     }
 
     return activeDiscountPercent;

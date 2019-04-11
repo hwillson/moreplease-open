@@ -115,6 +115,9 @@ const ProductSynch = {
 
   _insertNewShopifyProducts(store, products) {
     products.forEach((product) => {
+      const tags = this._parseTags(product.tags);
+      const maxRenewalDiscountPercent =
+        this._calculateMaxRenewalDiscountPercent(tags);
       if (product.variants) {
         product.variants.forEach((variant) => {
           if (variant.sku.indexOf('TF_SUB_') === -1) {
@@ -139,6 +142,8 @@ const ProductSynch = {
               },
               variationSku: variant.sku,
               storeId: store._id,
+              tags,
+              maxRenewalDiscountPercent,
             };
 
             const images = [];
@@ -158,6 +163,16 @@ const ProductSynch = {
         });
       }
     });
+  },
+
+  _parseTags(tags) {
+    return tags ? tags.split(', ') : undefined;
+  },
+
+  _calculateMaxRenewalDiscountPercent(tags = []) {
+    return tags
+      .filter(tag => tag.startsWith('max-renewal-percent-discount-'))
+      .map(tag => tag.split('-').pop())[0];
   },
 };
 

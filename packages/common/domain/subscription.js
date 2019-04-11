@@ -260,11 +260,18 @@ const Subscription = {
   },
 
   getSubscriptionItems() {
-    const allSubItems = SubscriptionItemsCollection.find({
+    const subItems = SubscriptionItemsCollection.find({
       subscriptionId: this._id,
     });
-    const availableSubItems =
-      ProductsCollection.filterNonMatchingSubItems(this.storeId, allSubItems);
+
+    const store = StoresCollection.findOne({ _id: this.storeId });
+    const subTotal = this.subscriptionSubtotalWithoutDiscounts();
+
+    const availableSubItems = ProductsCollection.filterNonMatchingSubItems({
+      store,
+      subTotal,
+      subItems,
+    });
     return availableSubItems;
   },
 
@@ -287,6 +294,16 @@ const Subscription = {
       subscriptionId: this._id,
       apiKey,
     });
+  },
+
+  subscriptionSubtotalWithoutDiscounts() {
+    const subscriptionItems = this.getSubscriptionItems();
+    let subscriptionSubtotal = 0;
+    const currency = this.currency;
+    subscriptionItems.forEach((subscriptionItem) => {
+      subscriptionSubtotal += subscriptionItem.totalPrice(currency);
+    });
+    return subscriptionSubtotal;
   },
 
   subscriptionSubtotal() {
