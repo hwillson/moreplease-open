@@ -636,6 +636,15 @@ const SubscriptionManager = {
         },
       );
     } catch (error) {
+      Raven.setContext({
+        tags: {
+          mp_store_payment_url: store.paymentServiceUrl,
+          mp_stripe_customer_id: stripeCustomerId,
+          mp_amount: amount,
+        },
+      });
+      Raven.captureException(error);
+      Raven.captureMessage('Unable to charge customer card.');
       chargeDetails = {
         data: {
           success: false,
