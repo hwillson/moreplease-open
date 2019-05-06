@@ -6,7 +6,7 @@
     "debug": "meteor --port 3100 --settings=/Users/hwillson/Documents/git/config/octonary/moreplease-open/admin/settings_local.json --inspect"
   },
   "dependencies": {
-    "@babel/runtime": "^7.0.0-beta.40",
+    "@babel/runtime": "^7.4.4",
     "bcrypt": "^1.0.3",
     "core-js": "^2.5.3",
     "mailgun-js": "^0.7.7",
