@@ -169,6 +169,7 @@ const Subscription = {
         renewalFrequencyLabel: this.renewalFrequencyLabel(),
         totalOrders: this.totalOrders(),
         totalSpent: this.totalSpent(),
+        renewalCount: this.renewalCount()
       };
 
       // If the current status is "failed" and the new status is "active",
