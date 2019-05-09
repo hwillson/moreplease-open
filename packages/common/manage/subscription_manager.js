@@ -315,7 +315,7 @@ const SubscriptionManager = {
       storeId: subscription.storeId,
       emailType: emailType.paymentFailed.id,
     });
-    if (paymentFailedEmail) {
+    if (paymentFailedEmail && paymentFailedEmail.enabled) {
       email.sendEmail(
         subscription.customerEmail,
         paymentFailedEmail.from,
