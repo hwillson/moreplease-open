@@ -42,7 +42,12 @@ const SubscriptionManager = {
               SubscriptionStatus.cancelled.id,
             ],
           },
+          // Only retry subscriptions for up to 14 days.
+          billingRetryCount: {
+            $lt: 14
+          }
         });
+
 
         subscriptionCount = subscriptions.count();
         subscriptions.forEach((subscription) => {
@@ -81,15 +86,17 @@ const SubscriptionManager = {
           const customer = subscription.getCustomer();
           const subscriptionItems = [];
           subscription.getSubscriptionItems().forEach((subscriptionItem) => {
-            const product = subscriptionItem.productVariation();
-            subscriptionItems.push({
-              productId: subscriptionItem.productId,
-              variationId: subscriptionItem.variationId,
-              quantity: subscriptionItem.quantity,
-              discountPercent: subscriptionItem.activeDiscountPercent(),
-              productName: product.productName,
-              variationName: product.variationName,
-            });
+            if (subscriptionItem.quantity > 0) {
+              const product = subscriptionItem.productVariation();
+              subscriptionItems.push({
+                productId: subscriptionItem.productId,
+                variationId: subscriptionItem.variationId,
+                quantity: subscriptionItem.quantity,
+                discountPercent: subscriptionItem.activeDiscountPercent(),
+                productName: product.productName,
+                variationName: product.variationName,
+              });
+            }
           });
           if (subscriptionItems.length > 0) {
             switch (store.storeType) {
