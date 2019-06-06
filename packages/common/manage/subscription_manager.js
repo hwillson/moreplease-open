@@ -26,44 +26,45 @@ const SubscriptionManager = {
   renewSubscriptions(storeId) {
     let subscriptionCount = 0;
     let currentSubscriptionId;
-    try {
-      if (storeId) {
-        // Won't try to renew paused or cancelled subscriptions.
-        const subscriptions = SubscriptionsCollection.find({
-          storeId,
-          // Any order with a renewal date < the end of the current day are
-          // considered for renewal.
-          renewalDate: {
-            $lte: moment().endOf('day').toDate(),
-          },
-          statusId: {
-            $nin: [
-              SubscriptionStatus.paused.id,
-              SubscriptionStatus.cancelled.id,
-            ],
-          },
-          // Only retry subscriptions for up to 14 days.
-          billingRetryCount: {
-            $lt: 14
-          }
-        });
 
+    if (storeId) {
+      // Won't try to renew paused or cancelled subscriptions.
+      const subscriptions = SubscriptionsCollection.find({
+        storeId,
+        // Any order with a renewal date < the end of the current day are
+        // considered for renewal.
+        renewalDate: {
+          $lte: moment().endOf('day').toDate(),
+        },
+        statusId: {
+          $nin: [
+            SubscriptionStatus.paused.id,
+            SubscriptionStatus.cancelled.id,
+          ],
+        },
+        // Only retry subscriptions for up to 14 days.
+        billingRetryCount: {
+          $lt: 14
+        }
+      });
 
-        subscriptionCount = subscriptions.count();
-        subscriptions.forEach((subscription) => {
-          // Only retry susbcription renewals for up to 14 times.
+      subscriptionCount = subscriptions.count();
+      subscriptions.forEach((subscription) => {
+        try {
+          // Only retry subscription renewals for up to 14 times.
           if (_.isUndefined(subscription.billingRetryCount)
               || subscription.billingRetryCount < 14) {
             currentSubscriptionId = subscription._id;
             this.createSubscriptionRenewal(subscription._id);
           }
-        });
-      }
-    } catch (error) {
-      Raven.captureException(error);
-      Raven.captureMessage(
-        `Unable to renew subscription: ${currentSubscriptionId}`,
-      );
+        } catch (error) {
+          // Keep trying subsequent renewals, but logged the failed ones
+          Raven.captureException(error);
+          Raven.captureMessage(
+            `Unable to renew subscription: ${currentSubscriptionId}`,
+          );
+        }
+      });
     }
 
     return subscriptionCount;
