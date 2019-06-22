@@ -601,6 +601,7 @@ const SubscriptionManager = {
           subscriptionOrdersCollection.insert(order);
           // Increase next renewal date by renewal frequency.
           subscription.resetRenewalDate();
+          subscription.resetBillingRetryCount();
 
           // Make sure status is set to active
           subscription.updateSubscriptionStatus(
@@ -617,6 +618,7 @@ const SubscriptionManager = {
           subscription.updateSubscriptionStatus(
             SubscriptionStatus.failed.id,
           );
+          subscription.increaseBillingRetryCount();
           subscription.setRenewalDateToTomorrow();
 
           // Send payment failed email to customer
