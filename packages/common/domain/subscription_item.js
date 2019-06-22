@@ -170,7 +170,7 @@ const SubscriptionItem = {
           ? this.largeRenewalDiscountPercent
           : this.smallRenewalDiscountPercent;
       if (
-        this.maxRenewalDiscountPercent &&
+        this.maxRenewalDiscountPercent != null &&
         this.maxRenewalDiscountPercent < activeDiscountPercent
       ) {
         activeDiscountPercent = this.maxRenewalDiscountPercent;
