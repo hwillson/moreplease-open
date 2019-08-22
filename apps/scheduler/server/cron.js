@@ -2,7 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import { SyncedCron } from 'meteor/percolate:synced-cron';
 import Raven from 'raven';
 
-import draftOrderManager from 'meteor/moreplease:stitch';
+// import draftOrderManager from 'meteor/moreplease:stitch';
 import {
   StoresCollection,
   ProductSynch,
@@ -28,8 +28,11 @@ Meteor.startup(() => {
   });
 
   StoresCollection.find().forEach((store) => {
-    // Disabling old TF store for now (will remove the data soon)
-    if (store._id !== 'nbdTeQ5xZ2QGu7fTD') {
+    // Disabling all TF stores for now (will remove data soon)
+    if (
+      (store._id !== 'nbdTeQ5xZ2QGu7fTD') &&
+      (store._id !== 'nED7bRFEMaKbApaf3')
+    ) {
       // Setup product synch jobs.
       SyncedCron.add({
         name: `Product synch job for store ${store._id}`,
@@ -71,6 +74,7 @@ Meteor.startup(() => {
     }
 
     // Special jobs just for TF
+    /*
     if (store._id === 'nED7bRFEMaKbApaf3') {
       SyncedCron.add({
         name: 'Stitch "draft order" synch for TF.',
@@ -109,6 +113,7 @@ Meteor.startup(() => {
         },
       });
     }
+    */
   });
 
   SyncedCron.start();
