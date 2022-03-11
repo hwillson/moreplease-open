@@ -2,10 +2,10 @@
   "name": "subscriber",
   "private": true,
   "scripts": {
-    "start": "MONGO_URL=mongodb://127.0.0.1:3101/meteor meteor --port 3300 --settings=/Users/hwillson/Documents/git/octonary/config/moreplease-open/subscriber/settings_local.json"
+    "start": "MONGO_URL=mongodb://127.0.0.1:3101/meteor meteor --port 3300"
   },
   "dependencies": {
-    "@babel/runtime": "^7.0.0-beta.40",
+    "@babel/runtime": "^7.17.2",
     "bcrypt": "^1.0.3",
     "meteor-node-stubs": "~0.2.4",
     "sweetalert": "^2.1.0",
