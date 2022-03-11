@@ -6,7 +6,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.17.2",
-    "bcrypt": "^1.0.3",
+    "bcrypt": "^5.0.1",
     "meteor-node-stubs": "~0.2.4",
     "sweetalert": "^2.1.0",
     "url-search-params-polyfill": "^2.0.3"
