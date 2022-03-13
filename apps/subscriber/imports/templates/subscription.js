@@ -45,9 +45,11 @@ const initSubscriptions = (template) => {
     {
       onReady() {
         const subscription = SubscriptionsCollection.findOne();
-        console.log(SUB_ID, storeId, subscription);
         template.subscribe('singleCustomer', subscription.customerId);
       },
+      onStop(error) {
+        console.log('stopped', error);
+      }
     },
   );
   template.subscribe('subscriptionItems', SUB_ID, storeId);
