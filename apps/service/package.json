@@ -6,7 +6,7 @@
     "test": "meteor test --full-app --driver-package practicalmeteor:mocha --port 3250 --settings=/Users/hwillson/Documents/git/config/octonary/moreplease-open/service/settings_local.json"
   },
   "dependencies": {
-    "@babel/runtime": "7.0.0-beta.55",
+    "@babel/runtime": "^7.17.2",
     "body-parser": "^1.18.1",
     "mailgun-js": "^0.7.7",
     "meteor-node-stubs": "~0.2.4",
