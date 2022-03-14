@@ -38,28 +38,26 @@ if (!SUB_ID) {
 const initSubscriptions = (template) => {
   const storeId = Session.get('storeId');
   template.subscribe('store', storeId);
-  template.subscribe(
+  const subscriptionHandle = template.subscribe(
     'subscriptionNotCancelled',
     SUB_ID,
-    storeId,
-    {
-      onReady() {
-        const subscription = SubscriptionsCollection.findOne();
-        template.subscribe('singleCustomer', subscription.customerId);
-      },
-      onStop(error) {
-        console.log('stopped', error);
-      }
-    },
+    storeId
   );
+  if (subscriptionHandle.ready()) {
+    const subscription = SubscriptionsCollection.findOne();
+    if (subscription && subscription.customerId) {
+      template.subscribe('singleCustomer', subscription.customerId);
+    } else {
+      console.log("Missing customer ID?", SUB_ID, storeId, subscriptionHandle);
+    }
+  }
   template.subscribe('subscriptionItems', SUB_ID, storeId);
   template.subscribe('productsForSubscription', SUB_ID);
   template.subscribe('customerStoreDetails', storeId);
   template.subscriptionsInitialized.set(true);
 };
 
-const verifyAccess = () => {
-  const template = Template.instance();
+const verifyAccess = (template) => {
   const storeId = Session.get('storeId');
   if (!storeId) {
     if (API_KEY) {
@@ -81,7 +79,7 @@ Template.body.onCreated(function onCreated() {
   this.subscriptionsInitialized = new ReactiveVar(false);
 
   this.autorun(() => {
-    verifyAccess();
+    verifyAccess(Template.instance());
   });
 
   // If called from an iframe, pass the content height back to the iframe so
