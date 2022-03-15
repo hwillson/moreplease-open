@@ -44,7 +44,7 @@ const initSubscriptions = (template) => {
     storeId
   );
   if (subscriptionHandle.ready()) {
-    const subscription = SubscriptionsCollection.findOne();
+    const subscription = SubscriptionsCollection.findOne({ _id: SUB_ID });
     if (subscription && subscription.customerId) {
       template.subscribe('singleCustomer', subscription.customerId);
     } else {
