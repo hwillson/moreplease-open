@@ -35,20 +35,33 @@ if (!SUB_ID) {
   throw new Error('Missing subscription ID.');
 }
 
+function setupSubSubscription(storeId, template, subId) {
+  const subHandle = template.subscribe(
+    'subscriptionNotCancelled',
+    subId,
+    storeId,
+  );
+  return subHandle;
+}
+
 const initSubscriptions = (template) => {
   const storeId = Session.get('storeId');
   template.subscribe('store', storeId);
-  const subscriptionHandle = template.subscribe(
-    'subscriptionNotCancelled',
-    SUB_ID,
-    storeId
-  );
-  if (subscriptionHandle.ready()) {
-    const subscription = SubscriptionsCollection.findOne({ _id: SUB_ID });
+  let subHandle = setupSubSubscription(storeId, template, SUB_ID);
+  if (subHandle.ready()) {
+    let subscription = SubscriptionsCollection.findOne({ _id: SUB_ID });
+    console.log("First try", subscription);
     if (subscription && subscription.customerId) {
       template.subscribe('singleCustomer', subscription.customerId);
     } else {
-      console.log("Missing customer ID?", SUB_ID, storeId, subscriptionHandle);
+      console.log("Missing customer ID?", SUB_ID, storeId);
+      console.log("Re-subscribing and trying again ...");
+      let subHandle = setupSubSubscription(storeId, template, SUB_ID);
+      if (subHandle.ready()) {
+        let subscription = SubscriptionsCollection.findOne({ _id: SUB_ID });
+        console.log("Second try", subscription);
+        template.subscribe('singleCustomer', subscription.customerId);
+      }
     }
   }
   template.subscribe('subscriptionItems', SUB_ID, storeId);
