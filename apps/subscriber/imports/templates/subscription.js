@@ -1,15 +1,15 @@
 /* global window, URLSearchParams */
 
-import { Meteor } from 'meteor/meteor';
-import { Session } from 'meteor/session';
-import { Template } from 'meteor/templating';
-import { ReactiveVar } from 'meteor/reactive-var';
-import { Tracker } from 'meteor/tracker';
-import { $ } from 'meteor/jquery';
-import { _ } from 'meteor/underscore';
-import { moment } from 'meteor/momentjs:moment';
-import swal from 'sweetalert';
-import 'url-search-params-polyfill';
+import { Meteor } from "meteor/meteor";
+import { Session } from "meteor/session";
+import { Template } from "meteor/templating";
+import { ReactiveVar } from "meteor/reactive-var";
+import { Tracker } from "meteor/tracker";
+import { $ } from "meteor/jquery";
+import { _ } from "meteor/underscore";
+import { moment } from "meteor/momentjs:moment";
+import swal from "sweetalert";
+import "url-search-params-polyfill";
 
 import {
   StoresCollection,
@@ -20,69 +20,63 @@ import {
   price as priceUtil,
   ProductsCollection,
   subscriptionRenewalFrequency,
-} from 'meteor/moreplease:common';
+} from "meteor/moreplease:common";
 
-import './subscription.html';
+import "./subscription.html";
 
 const urlParams = new URLSearchParams(window.location.search);
-const API_KEY = urlParams.get('token');
+const API_KEY = urlParams.get("token");
 if (!API_KEY) {
-  throw new Error('Missing access token.');
+  throw new Error("Missing access token.");
 }
 
-const SUB_ID = urlParams.get('id');
+const SUB_ID = urlParams.get("id");
 if (!SUB_ID) {
-  throw new Error('Missing subscription ID.');
+  throw new Error("Missing subscription ID.");
 }
 
 function setupSubSubscription(storeId, template, subId) {
   const subHandle = template.subscribe(
-    'subscriptionNotCancelled',
+    "subscriptionNotCancelled",
     subId,
-    storeId,
+    storeId
   );
   return subHandle;
 }
 
-const initSubscriptions = (template) => {
-  const storeId = Session.get('storeId');
-  template.subscribe('store', storeId);
-  let subHandle = setupSubSubscription(storeId, template, SUB_ID);
+function initSubscriptions({ storeId, template }) {
+  template.subscribe("store", storeId);
+  const subHandle = template.subscribe(
+    "subscriptionNotCancelled",
+    SUB_ID,
+    storeId
+  );
   if (subHandle.ready()) {
-    let subscription = SubscriptionsCollection.findOne({ _id: SUB_ID });
-    console.log("First try", subscription);
+    const subscription = SubscriptionsCollection.findOne({ _id: SUB_ID });
     if (subscription && subscription.customerId) {
-      template.subscribe('singleCustomer', subscription.customerId);
+      template.subscribe("singleCustomer", subscription.customerId);
     } else {
       console.log("Missing customer ID?", SUB_ID, storeId);
-      console.log("Re-subscribing and trying again ...");
-      let subHandle = setupSubSubscription(storeId, template, SUB_ID);
-      if (subHandle.ready()) {
-        let subscription = SubscriptionsCollection.findOne({ _id: SUB_ID });
-        console.log("Second try", subscription);
-        template.subscribe('singleCustomer', subscription.customerId);
-      }
     }
   }
-  template.subscribe('subscriptionItems', SUB_ID, storeId);
-  template.subscribe('productsForSubscription', SUB_ID);
-  template.subscribe('customerStoreDetails', storeId);
+  template.subscribe("subscriptionItems", SUB_ID, storeId);
+  template.subscribe("productsForSubscription", SUB_ID);
+  template.subscribe("customerStoreDetails", storeId);
   template.subscriptionsInitialized.set(true);
-};
+}
 
-const verifyAccess = (template) => {
-  const storeId = Session.get('storeId');
+const verifyAccess = ({ storeId, template }) => {
   if (!storeId) {
     if (API_KEY) {
-      Meteor.call('findStoreIdForApiKey', API_KEY, (error, result) => {
-        Session.set('storeId', result);
-        initSubscriptions(template);
+      Meteor.call("findStoreIdForApiKey", API_KEY, (error, result) => {
+        Session.set("storeId", result);
+        initSubscriptions({ storeId: result, template });
       });
     } else {
-      throw new Error('Missing access token.');
+      throw new Error("Missing access token.");
     }
   } else {
-    initSubscriptions(template);
+    initSubscriptions({ storeId, template });
   }
 };
 
@@ -90,9 +84,11 @@ const getStore = () => StoresCollection.findOne();
 
 Template.body.onCreated(function onCreated() {
   this.subscriptionsInitialized = new ReactiveVar(false);
+  const storeId = Session.get("storeId");
+  const template = this;
 
   this.autorun(() => {
-    verifyAccess(Template.instance());
+    verifyAccess({ storeId, template });
   });
 
   // If called from an iframe, pass the content height back to the iframe so
@@ -102,11 +98,14 @@ Template.body.onCreated(function onCreated() {
       if (Template.instance().subscriptionsReady()) {
         if (SubscriptionItemsCollection.find().fetch()) {
           Tracker.afterFlush(() => {
-            $('img:last').on('load', () => {
+            $("img:last").on("load", () => {
               const parentUrl = getStore().subscriptionPageUrl;
-              $.postMessage({
-                if_height: $('body').outerHeight(true),
-              }, parentUrl);
+              $.postMessage(
+                {
+                  if_height: $("body").outerHeight(true),
+                },
+                parentUrl
+              );
             });
           });
         }
@@ -118,29 +117,33 @@ Template.body.onCreated(function onCreated() {
 Template.body.onRendered(function onRendered() {
   const instance = Template.instance();
   this.autorun(() => {
-    if (instance.subscriptionsInitialized.get()
-        && instance.subscriptionsReady()) {
+    if (
+      instance.subscriptionsInitialized.get() &&
+      instance.subscriptionsReady()
+    ) {
       const subscription = SubscriptionsCollection.findOne();
-      if (subscription
-          && ((subscription.statusId === SubscriptionStatus.paused.id)
-            || (subscription.statusId === SubscriptionStatus.failed.id))) {
+      if (
+        subscription &&
+        (subscription.statusId === SubscriptionStatus.paused.id ||
+          subscription.statusId === SubscriptionStatus.failed.id)
+      ) {
         Meteor.defer(() => {
-          $('.sub-pause').hide();
-          $('.sub-resume').show();
+          $(".sub-pause").hide();
+          $(".sub-resume").show();
         });
       }
 
       Meteor.defer(() => {
-        $('.sub-renewal-date').datepicker({
+        $(".sub-renewal-date").datepicker({
           format: getStore().getDatePickerFormat(),
           autoclose: true,
-          startDate: moment().add(1, 'days').format(getStore().dateFormat),
+          startDate: moment().add(1, "days").format(getStore().dateFormat),
         });
       });
 
       Meteor.defer(() => {
         if (subscription) {
-          $('.sub-renewal-freq').val(subscription.renewalFrequencyId);
+          $(".sub-renewal-freq").val(subscription.renewalFrequencyId);
         }
       });
     }
@@ -172,8 +175,7 @@ Template.body.helpers({
     let subscriptionItemsCount = 0;
     const subscription = getCurrentSubscription();
     if (subscription) {
-      subscriptionItemsCount =
-        SubscriptionItemsCollection.find().count();
+      subscriptionItemsCount = SubscriptionItemsCollection.find().count();
     }
     return subscriptionItemsCount;
   },
@@ -199,20 +201,17 @@ Template.body.helpers({
   },
 
   variations() {
-    return ProductsCollection.findProductVariations(
-      this.productId,
-    );
+    return ProductsCollection.findProductVariations(this.productId);
   },
 
   selectedIfEquals(selectedVariationId) {
-    return (this.variationId === selectedVariationId) ? 'selected' : '';
+    return this.variationId === selectedVariationId ? "selected" : "";
   },
 
   paymentFailed() {
     let paymentFailed = false;
     const subscription = getCurrentSubscription();
-    if (subscription.statusId ===
-        SubscriptionStatus.failed.id) {
+    if (subscription.statusId === SubscriptionStatus.failed.id) {
       paymentFailed = true;
     }
     return paymentFailed;
@@ -220,8 +219,7 @@ Template.body.helpers({
 
   isPaused() {
     const subscription = getCurrentSubscription();
-    return (SubscriptionStatus.paused.id ===
-        subscription.statusId);
+    return SubscriptionStatus.paused.id === subscription.statusId;
   },
 
   availableRenewalFrequencies() {
@@ -234,14 +232,15 @@ Template.body.helpers({
 
   subscriptionsInitialized() {
     const instance = Template.instance();
-    return instance.subscriptionsInitialized.get()
-      && instance.subscriptionsReady();
+    return (
+      instance.subscriptionsInitialized.get() && instance.subscriptionsReady()
+    );
   },
 
   imageUrl(image) {
     let imageUrl;
     if (image) {
-      if (image.indexOf('http') === 0) {
+      if (image.indexOf("http") === 0) {
         imageUrl = image;
       } else {
         imageUrl = `${getStore().url}${image}`;
@@ -272,72 +271,74 @@ Template.body.helpers({
 });
 
 Template.body.events({
-  'click .remove-sub-item'(event) {
+  "click .remove-sub-item"(event) {
     event.preventDefault();
     this.remove();
   },
 
-  'click .sub-pause'(event) {
+  "click .sub-pause"(event) {
     event.preventDefault();
     swal({
-      title: 'Pause Your Subscription?',
-      text: 'Are you sure you want to pause your subscription? Pausing ' +
-            'means shipments will be put on-hold and you will not be ' +
-            'charged until your resume your subscription.',
-      icon: 'warning',
+      title: "Pause Your Subscription?",
+      text:
+        "Are you sure you want to pause your subscription? Pausing " +
+        "means shipments will be put on-hold and you will not be " +
+        "charged until your resume your subscription.",
+      icon: "warning",
       buttons: {
         cancel: {
-          text: 'Cancel',
+          text: "Cancel",
           visible: true,
           value: false,
         },
         confirm: {
-          text: 'Definitely',
+          text: "Definitely",
           closeModal: true,
           value: true,
         },
       },
       dangerMode: true,
-      className: 'mp-widget',
+      className: "mp-widget",
     }).then((confirmed) => {
       if (confirmed) {
         this.updateSubscriptionStatus(SubscriptionStatus.paused.id);
-        $('.sub-pause').hide();
-        $('.sub-resume').show();
+        $(".sub-pause").hide();
+        $(".sub-resume").show();
       }
     });
   },
 
-  'click .sub-resume'(event) {
+  "click .sub-resume"(event) {
     event.preventDefault();
     this.updateSubscriptionStatus(SubscriptionStatus.active.id);
-    $('.sub-resume').hide();
-    $('.sub-pause').show();
+    $(".sub-resume").hide();
+    $(".sub-pause").show();
   },
 
-  'click .sub-cancel'(event) {
+  "click .sub-cancel"(event) {
     event.preventDefault();
     swal({
-      title: 'Cancel Your Subscription?',
-      text: 'Are you sure you want to cancel your subscription? ' +
-            'Cancelling will completely remove your subscription from your ' +
-            'account (all subscription items will be removed). You will no ' +
-            'longer receive subscription shipments.',
-      icon: 'warning',
+      title: "Cancel Your Subscription?",
+      text:
+        "Are you sure you want to cancel your subscription? " +
+        "Cancelling will completely remove your subscription from your " +
+        "account (all subscription items will be removed). You will no " +
+        "longer receive subscription shipments.",
+      icon: "warning",
       buttons: {
         cancel: {
-          text: 'Keep Subscription',
+          text: "Keep Subscription",
           visible: true,
           value: false,
         },
         confirm: {
-          text: 'Cancel Subscription',
+          text: "Cancel Subscription",
           closeModal: true,
           value: true,
         },
       },
       dangerMode: true,
-      className: 'mp-widget',
+      className: "mp-widget",
     }).then((confirmed) => {
       if (confirmed) {
         this.cancelSubscription(API_KEY);
@@ -345,31 +346,28 @@ Template.body.events({
     });
   },
 
-  'change .sub-renewal-date': _.debounce(function debounce(event) {
+  "change .sub-renewal-date": _.debounce(function debounce(event) {
     const selectedDate = $(event.currentTarget).val();
     if (selectedDate) {
       this.updateRenewalDate(selectedDate, getStore().dateFormat);
     } else {
       $(event.currentTarget).val(
-        dateUtil.formatDate(
-          this.renewalDate,
-          getStore().dateFormat,
-        ),
+        dateUtil.formatDate(this.renewalDate, getStore().dateFormat)
       );
     }
   }, 100),
 
-  'change .sub-renewal-freq'(event) {
-    const frequencyId = $(event.currentTarget).find(':selected').val();
+  "change .sub-renewal-freq"(event) {
+    const frequencyId = $(event.currentTarget).find(":selected").val();
     this.updateRenewalFrequency(frequencyId);
   },
 
-  'click .quantity-up'(event) {
+  "click .quantity-up"(event) {
     this.setQuantity(this.quantity + 1);
     $(event.currentTarget).blur();
   },
 
-  'click .quantity-down'(event) {
+  "click .quantity-down"(event) {
     const quantity = this.quantity;
     if (quantity > 1) {
       this.setQuantity(this.quantity - 1);
@@ -377,12 +375,12 @@ Template.body.events({
     $(event.currentTarget).blur();
   },
 
-  'change .quantity'(event) {
+  "change .quantity"(event) {
     const quantity = $(event.currentTarget).val();
     this.setQuantity(quantity);
   },
 
-  'change .sub-item-variations'(event) {
+  "change .sub-item-variations"(event) {
     const variationId = $(event.currentTarget).val();
     this.updateVariationId(variationId);
   },
