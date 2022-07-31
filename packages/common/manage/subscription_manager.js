@@ -20,7 +20,13 @@ import subscriptionOrderType from '../domain/subscription_order_type';
 import { subscriptionOrdersCollection } from '../domain/subscription_order';
 
 import Raven from 'raven';
-Raven.config(Meteor.settings.private.sentry.dsn).install();
+if (
+  Meteor.settings &&
+  Meteor.settings.private &&
+  Meteor.settings.private.sentry
+) {
+  Raven.config(Meteor.settings.private.sentry.dsn).install();
+}
 
 const SubscriptionManager = {
   renewSubscriptions(storeId) {
